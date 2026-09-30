@@ -1,0 +1,14 @@
+Conformance of {{ root }}:
+{%- for rule in rules %}
+  {{ rule.status }} {{ rule.id }}: {{ rule.detail }}
+{%- endfor %}
+
+Verdict: {{ verdict }} ({{ counts.pass }} pass, {{ counts.fail }} fail, {{ counts.skip }} skip)
+{%- if failed_rules.size > 0 %}
+
+Failing: {{ failed_rules | join: ", " }}. Each detail above names what the kit saw; the spec sentence behind each rule:
+{%- for rule in rules %}{% if rule.status == "FAIL" %}
+  {{ rule.id }}: {{ rule.spec }}
+{%- endif %}{% endfor %}
+Fix the tool and run check-conformance again.
+{%- endif %}

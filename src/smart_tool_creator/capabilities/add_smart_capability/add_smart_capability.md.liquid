@@ -1,0 +1,84 @@
+You are extending the smart tool at {{ root }}. It follows the Amplifier Smart Tool Spec: the library holds every capability, the CLI and any other surface are thin wrappers over it, and model-backed capabilities go through the tool's own `Intelligence` interface rather than an SDK.
+
+## Read first, in this order
+
+1. `AGENTS.md`, for how this repository expects to be worked in
+2. `CONTRIBUTING.md`, for the exact lint, type check, test, and conformance commands
+3. `docs/00-vision.md`, for what the tool is and is not
+4. the `SMART_TOOL.md` under `src/`, for the manifest and the body the tool's skill renders
+5. `lib.py`, `cli.py`, and the `SKILL.md` beside an existing capability, for the shape every capability already takes
+6. the `intelligence/` package, for the interface a model-backed capability runs through
+7. the existing tests, for how they fake the intelligence
+8. `reference/`, when it is there: the spec and the SDK, to read rather than recall
+
+A tool not scaffolded by smart-tool-creator may lay these out differently. Find the equivalents rather than assuming the paths.
+
+## The request
+
+{{ request }}
+{% if context != empty %}
+## Context from the caller
+
+Read every path named here before you design anything.
+{% for entry in context %}
+- {{ entry }}
+{%- endfor %}
+{% endif %}
+## Definition of done
+
+One model-backed capability, complete:
+
+- the capability's code in `capabilities/<name>/capability.py`, or this tool's equivalent layout, with its prompt templates beside it, and a facade function in `lib.py` that imports it. The capability goes through the tool's `Intelligence` interface, never an SDK directly. Its preflight failure names exactly what to configure, and it never falls back to a deterministic answer.
+- a thin command in `cli.py` whose help text says it is model-backed. Argument parsing and I/O only; capability that exists only in the wrapper is a defect.
+- the library function takes `model: str = DEFAULT_INTELLIGENCE_MODEL` and `reasoning_effort: ReasoningEffort = "medium"` from the tool's `schemas.py`, and the command exposes both as `--model` and `--reasoning-effort`. If `schemas.py` has no `DEFAULT_INTELLIGENCE_MODEL`, add it there set to `{{ default_model }}`.
+- tests that inject a fake `Intelligence`, so they pass with no model provider configured.
+- the capability's own skill at `capabilities/<name>/SKILL.md`, beside its code: what it does and when to use it, every argument and what it is for, a worked CLI invocation and a worked Python one, what it returns, and how it fails. Body only, with no title and no deterministic or model-backed line, because the library renders those. Register it on the capability's row in the capability list the skill renders (`core/skill.py` `CAPABILITIES`, or this tool's equivalent) through `skill=`.
+- `<tool> <name> --help` prints that skill and `<tool> <name> -h` the terse generated table, which the tool's `tests/test_skill.py` enumerates over every capability.
+- sections in `docs/01-library.md` and `docs/02-cli.md`, and `skills/<name>/SKILL.md` when the tool ships one.
+
+## Models
+
+Never write a model name from memory. The names you remember are older than the ones the account can use, and they are wrong even when they look familiar.
+The default is the tool's `DEFAULT_INTELLIGENCE_MODEL`. When you have to pick or confirm a model, list what the signed-in account can use right now and choose from that list.
+
+With the copilot-sdk intelligence layer, run this from the tool's root:
+
+```bash
+uv run python -c "
+import asyncio, subprocess
+from copilot import CopilotClient
+async def main():
+    token = subprocess.run(['gh', 'auth', 'token'], capture_output=True, text=True).stdout.strip()
+    client = CopilotClient(github_token=token)
+    await client.start()
+    try:
+        for model in await client.list_models():
+            print(model.id, model.name)
+    finally:
+        await client.stop()
+asyncio.run(main())"
+```
+
+Another intelligence layer has its own listing call in its SDK; read the SDK in `reference/` for it.
+
+## Constraints
+
+- Stay inside {{ root }}. Write nothing outside it.
+- Never modify `AGENTS.md`.
+- Do not commit anything. The person who called you owns git here.
+- Follow the style of the code already in this repository instead of introducing your own.
+- Build long prompts with `liquid.render` from a template file, not string concatenation.
+
+## Verify
+
+Run the tool's own checks, as its `CONTRIBUTING.md` describes them:
+
+- `uv run pytest`
+- the conformance kit: `uv run -- uv run --no-project https://raw.githubusercontent.com/microsoft/amplifier-smart-tools/main/conformance/run.py .`
+- `prek run --all-files`, when `prek` is installed
+
+Fix what they report and rerun them until they pass.
+
+## Report
+
+Finish with a plain-text report: the capability's name, the files you added or changed, the exact command to try it, and any caveats the caller should know. No JSON.

@@ -1,0 +1,18 @@
+{{ report }}
+
+Checks in {{ root }}:
+{%- for check in checks %}
+  {{ check.name }} {{ check.status }}{% if check.status == "skipped" %}: {{ check.output }}{% endif %}
+{%- endfor %}
+
+Next:
+  try the command the report names
+  review docs/00-vision.md and docs/01-library.md: they set the stage for what gets implemented,
+    so the new capability should fit what they say, or they should change
+  run the tool's own checks as its CONTRIBUTING.md describes
+  commit and push it if it looks right
+{%- if failing.size > 0 %}
+
+Still failing after {{ fix_rounds }} fix rounds: {{ failing | join: ", " }}.
+The capability is in the working tree at {{ root }}; fix the checks or discard the changes.
+{%- endif %}
