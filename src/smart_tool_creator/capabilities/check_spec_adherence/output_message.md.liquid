@@ -1,0 +1,26 @@
+{%- if kit_failed -%}
+{{ conformance_message }}
+
+No reviewer ran on {{ root }}: the conformance kit decides the mechanical rules first, and it failed.
+Fix the failing rules above and run check-spec-adherence again.
+{%- else -%}
+Spec adherence of {{ root }}:
+{%- for finding in findings %}
+  {{ finding.status }} {{ finding.id }}: {{ finding.summary }}
+{%- endfor %}
+{%- if deviations.size > 0 %}
+
+Deviations:
+{%- for finding in deviations %}
+
+  {{ finding.id }}
+    spec: {{ finding.spec }}
+{%- for line in finding.evidence %}
+    evidence: {{ line }}
+{%- endfor %}
+    suggestion: {{ finding.suggestion }}
+{%- endfor %}
+{%- endif %}
+
+{{ counts.adheres }} adhere, {{ counts.deviates }} deviate, {{ counts["not-applicable"] }} not applicable, {{ counts.unclear }} unclear.
+{%- endif -%}

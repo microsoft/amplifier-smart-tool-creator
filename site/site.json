@@ -1,0 +1,55 @@
+{
+  "key": "smart-tool-creator",
+  "name": "Smart Tool Creator",
+  "accent": "#526f5b",
+  "promise": "Turn what you know into a tool.",
+  "description": "Package domain expertise as an Amplifier Smart Tool. Start with a working structure, add intelligent capabilities, and check the result against the specification.",
+  "image": "site/assets/creator-flow.svg",
+  "alt": "Illustration of three stages: scaffold a library, add domain expertise, and check the tool against the specification.",
+  "caption": "From domain expertise to a tool another agent can use. Process illustration.",
+  "width": 1200,
+  "height": 600,
+  "flow_title": "Build the capability. Share the expertise.",
+  "flow_intro": "Move the knowledge in your skills, bundles, or workflows into a standalone library and CLI.",
+  "steps": [
+    [
+      "Start with the structure.",
+      "Scaffold a Git repository with the package, manifest, library, and CLI the specification calls for."
+    ],
+    [
+      "Add what your tool knows.",
+      "Describe a model-backed capability and the context it needs. Smart Tool Creator implements it and runs the tool's own checks."
+    ],
+    [
+      "Check the result.",
+      "Run the conformance kit, then review the design against the specification for actionable improvements."
+    ]
+  ],
+  "detail_title": "A foundation for the tools you want to make.",
+  "details": [
+    [
+      "Library at the core.",
+      "Make capabilities available to applications, agents, and scripts through a library with a thin command-line interface."
+    ],
+    [
+      "Guidance travels with the tool.",
+      "Scaffold the manifest and skill-format help so another agent can discover the tool and learn how to call it."
+    ],
+    [
+      "Checks with useful answers.",
+      "Get rule-by-rule conformance results and a model-backed review of the parts of the specification that need judgment."
+    ]
+  ],
+  "prompt": "Use Smart Tool Creator to package my domain expertise as an Amplifier Smart Tool. Read smart-tool-creator --help, help me define the capability, scaffold the project, and check it against the specification.",
+  "install": "uv tool install git+https://github.com/microsoft/amplifier-smart-tool-creator\nsmart-tool-creator --help",
+  "prerequisites": "Python 3.13+, uv 0.9.17 or newer, and Git.",
+  "model_note": "Model-backed implementation and review use GitHub Copilot through your signed-in GitHub CLI account.",
+  "guide": "src/smart_tool_creator/SMART_TOOL.md",
+  "related": [
+    "stories",
+    "unfold",
+    "showrun"
+  ],
+  "kind": "tool",
+  "title": "Smart Tool Creator | Amplifier Smart Tools"
+}

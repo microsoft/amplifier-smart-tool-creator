@@ -1,0 +1,21 @@
+The smart tool's own checks were rerun in {{ root }} from outside this session, against the capability now in its working tree. These are still failing.
+
+## Failing checks
+{% for check in checks %}
+### {{ check.name }}
+
+Command, run from {{ root }}:
+
+```
+{{ check.command }}
+```
+
+The tail of its output:
+
+```
+{{ check.output }}
+```
+{% endfor %}
+Fix what these report, rerun the same commands from {{ root }} until they pass, and finish with the full plain-text report again: the capability's name, every file you added or changed across both passes, the exact command to try it, what you fixed here and why, and any caveats. No JSON.
+
+The constraints have not changed: stay inside {{ root }}, never modify `AGENTS.md`, do not commit, and follow the style of the code already in this repository. Fix the cause the check names; never weaken a check, delete a failing test, or skip one to make it pass.

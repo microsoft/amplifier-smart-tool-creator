@@ -1,0 +1,30 @@
+Scaffolded {{ name }} at {{ root }}
+  {{ files | size }} files written as a {{ language }} tool with {{ intelligence }} intelligence, committed to a new git repository{% if placeholder %} with no remote{% else %} whose origin is {{ repository }}{% endif %}
+  environment synced: `uv run {{ name }} manifest` works from that directory
+{%- if skill %}
+  Agent Skill at skills/{{ name }}/SKILL.md
+{%- endif %}
+  reference/ holds shallow clones of:
+{%- for reference in references %}
+    {{ reference }}
+{%- endfor %}
+
+Next:
+  cd {{ root }}
+  read AGENTS.md
+  fill in docs/00-vision.md: goals, non-goals, and what the tool leaves to others.
+    Recommended before any code: it sets the stage for everything implemented and is what the tool is held to.
+  if you already know the surface, sketch it in docs/01-library.md: each capability, its signature, and what it returns.
+    Both docs are for people; keep them concise and readable.
+  add the first capability under src/{{ package }}/capabilities/<name>/, then expose it from lib.py and cli.py
+  write its skill at src/{{ package }}/capabilities/<name>/SKILL.md and name it on its row in core/skill.py CAPABILITIES,
+    so `{{ name }} <name> --help` prints it and `{{ name }} <name> -h` stays the terse table
+  document it in docs/01-library.md and docs/02-cli.md
+  run `prek run --all-files`, `uv run pytest`, and the conformance kit as CONTRIBUTING.md describes
+{%- if placeholder %}
+  the install instructions in README.md, SMART_TOOL.md, the skill, and pyproject.toml point at the placeholder {{ repository }}
+    and do not work until the tool is pushed. When ready: create the repository, replace the placeholder everywhere it
+    appears, then `git remote add origin <url>` and `git push -u origin main`
+{%- else %}
+  create {{ repository }} if it does not exist yet, then `git push -u origin main`
+{%- endif %}

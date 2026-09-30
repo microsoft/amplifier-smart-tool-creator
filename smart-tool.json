@@ -1,0 +1,5 @@
+{
+  "manifest": "src/smart_tool_creator/SMART_TOOL.md",
+  "cli_argv": ["smart-tool-creator"],
+  "deterministic_smoke": ["manifest"]
+}

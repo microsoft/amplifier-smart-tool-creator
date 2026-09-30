@@ -1,0 +1,32 @@
+---
+name: {{ name }}
+description: >-
+  {{ description }}. Drive it from the command line as `{{ name }}`, or from Python through
+  `{{ package }}.lib`. Triggers on "{{ name }}".
+license: MIT
+metadata:
+  repository: {{ repository }}
+---
+
+# Using {{ name }}
+
+{{ description }}.
+
+## Install
+
+```bash
+# as a CLI
+uv tool install git+{{ repository }}
+
+# as a library, from another project
+uv add "{{ name }} @ git+{{ repository }}"
+
+# once, without installing
+uvx --from git+{{ repository }} {{ name }} --help
+```
+## Use it
+
+Run `{{ name }} --help`. It prints the tool's skill: when to use it, every capability, sharp
+edges, and which files to read. Follow it. Then read the capability's own skill with
+`{{ name }} <command> --help` before calling it: it carries the arguments, a worked
+invocation, the result, and the failures. Never work from memory.
