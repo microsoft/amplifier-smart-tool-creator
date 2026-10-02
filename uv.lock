@@ -114,16 +114,16 @@ wheels = [
 
 [[package]]
 name = "amplifier-agent"
-version = "1.0.0a2"
-source = { git = "https://github.com/microsoft/amplifier-agent?subdirectory=packages%2Fpython&rev=v1#2d82ef65335c37f38fbc7f79c1f2bff8175e09ad" }
+version = "0.20.0"
+source = { git = "https://github.com/microsoft/amplifier-agent?subdirectory=packages%2Fpython&rev=v0.20.0#fcdea58fcefa14c8340e6fd4d703947d08451dd3" }
 dependencies = [
     { name = "amplifier-agent-engine" },
 ]
 
 [[package]]
 name = "amplifier-agent-engine"
-version = "1.0.0a2"
-source = { git = "https://github.com/microsoft/amplifier-agent?subdirectory=packages%2Fengine&rev=v1#2d82ef65335c37f38fbc7f79c1f2bff8175e09ad" }
+version = "0.20.0"
+source = { git = "https://github.com/microsoft/amplifier-agent?subdirectory=packages%2Fengine&rev=v0.20.0#fcdea58fcefa14c8340e6fd4d703947d08451dd3" }
 dependencies = [
     { name = "amplifier-core" },
     { name = "amplifier-foundation" },
@@ -384,7 +384,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "amplifier-agent", marker = "extra == 'amplifier-agent'", git = "https://github.com/microsoft/amplifier-agent?subdirectory=packages%2Fpython&rev=v1" },
+    { name = "amplifier-agent", marker = "extra == 'amplifier-agent'", git = "https://github.com/microsoft/amplifier-agent?subdirectory=packages%2Fpython&rev=v0.20.0" },
     { name = "amplifier-smart-tool-creator", extras = ["copilot", "amplifier-agent"], marker = "extra == 'all'" },
     { name = "github-copilot-sdk", marker = "extra == 'copilot'", specifier = ">=1.0.13,<2.0.0" },
     { name = "jsonschema", specifier = ">=4.26.0,<5.0.0" },

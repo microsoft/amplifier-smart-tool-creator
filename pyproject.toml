@@ -26,7 +26,7 @@ copilot = [
     "github-copilot-sdk>=1.0.13,<2.0.0",
 ]
 amplifier-agent = [
-    "amplifier-agent @ git+https://github.com/microsoft/amplifier-agent@v1#subdirectory=packages/python",
+    "amplifier-agent @ git+https://github.com/microsoft/amplifier-agent@v0.20.0#subdirectory=packages/python",
 ]
 all = [
     "amplifier-smart-tool-creator[copilot,amplifier-agent]",

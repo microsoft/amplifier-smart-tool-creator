@@ -150,4 +150,3 @@ def test_the_cli_passes_the_agent_provider_and_model_through(monkeypatch: pytest
     assert result.exit_code == 0
     assert received["agent_provider"] == "amplifier-agent"
     assert received["model"] == "anthropic/claude-opus-5"
-

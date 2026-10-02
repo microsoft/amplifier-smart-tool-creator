@@ -116,7 +116,7 @@ through GitHub Copilot, signed in as the GitHub CLI's user, so `gh` must be inst
 `gh auth login` completed with an account that has a Copilot subscription. `amplifier-agent`
 runs through Amplifier Agent and needs the credentials of the model provider `--model` names,
 for instance `OPENAI_API_KEY` for `openai/...`; see
-https://github.com/microsoft/amplifier-agent/blob/v1/docs/providers.md. An agent provider
+https://github.com/microsoft/amplifier-agent/blob/main/docs/providers.md. An agent provider
 that is not installed fails with the command that installs it. With nothing configured it
 fails immediately and names what to set; it never falls back to a deterministic answer.
 
