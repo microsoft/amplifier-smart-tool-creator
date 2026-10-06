@@ -1,4 +1,4 @@
-"""The submit tool every implementation answers a structured request through, and how a submission is judged."""
+"""How a structured answer is judged, and what the agent is told when it is not acceptable."""
 
 from typing import Any
 
@@ -24,3 +24,8 @@ def resubmit_prompt(problem: str) -> str:
     return (
         f"Your answer was not accepted: {problem}. Call the {SUBMIT_TOOL} tool now with an answer matching its schema."
     )
+
+
+def reanswer_prompt(problem: str) -> str:
+    """What the agent is told when its final answer, given without the submit tool, was not acceptable."""
+    return f"Your answer was not accepted: {problem}. Answer again with one JSON object matching the schema."

@@ -14,6 +14,7 @@ from smart_tool_creator.lib import (
     skill,
     skill_directory,
     skill_resources,
+    version,
 )
 from smart_tool_creator.schemas import DEFAULT_INTELLIGENCE_MODELS, DEFAULT_REVIEW_MODELS, SmartToolCreatorError
 
@@ -183,3 +184,11 @@ def test_every_capability_skill_documents_every_argument_the_cli_takes() -> None
                 continue
             for name in names:
                 assert name in document
+
+
+@pytest.mark.parametrize("flag", ["--version", "-V"])
+def test_version_prints_the_distribution_and_its_installed_version(flag: str) -> None:
+    result = runner.invoke(app, [flag])
+
+    assert result.exit_code == 0
+    assert result.output == f"amplifier-smart-tool-creator {version()}\n"

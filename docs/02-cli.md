@@ -12,6 +12,7 @@ smart-tool-creator -h                 terse summary for a person: the commands, 
 smart-tool-creator --help             the tool's skill, written for an agent driving it
 smart-tool-creator <command> -h       terse summary of one command: its arguments and defaults
 smart-tool-creator <command> --help   that command's skill, written for an agent about to call it
+smart-tool-creator -V, --version      the installed version
 ```
 
 `--help` on the tool prints what `lib.skill()` returns and on a command what `lib.skill("<command>")` returns; the CLI adds nothing of its own.
@@ -46,7 +47,7 @@ Exits 1 when the verdict is `FAIL`.
 ## smart-tool-creator check-spec-adherence
 
 ```bash
-smart-tool-creator check-spec-adherence [--directory PATH] [--check ID]... [--agent-provider copilot|amplifier-agent] [--model MODEL] [--reasoning-effort high]
+smart-tool-creator check-spec-adherence [--directory PATH] [--check ID]... [--agent-provider copilot|amplifier-agent|codex|claude] [--model MODEL] [--reasoning-effort high]
 ```
 
 `lib.check_spec_adherence(directory, checks, ...)` with `--check` repeated once per id. 
@@ -57,7 +58,7 @@ Exits 1 in either case: the kit failed, or any finding deviates.
 ## smart-tool-creator add-smart-capability
 
 ```bash
-smart-tool-creator add-smart-capability REQUEST [--directory PATH] [--context TEXT]... [--agent-provider copilot|amplifier-agent] [--model MODEL] [--reasoning-effort low]
+smart-tool-creator add-smart-capability REQUEST [--directory PATH] [--context TEXT]... [--agent-provider copilot|amplifier-agent|codex|claude] [--model MODEL] [--reasoning-effort low]
 ```
 
 `lib.add_smart_capability(request, ...)` with `REQUEST` positional and `--context` repeated once per entry. 

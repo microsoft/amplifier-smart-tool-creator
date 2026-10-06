@@ -1,6 +1,9 @@
 """The contract every model-backed capability runs through, so the implementation is swappable."""
 
 from importlib.util import find_spec
+import os
+from pathlib import Path
+import sys
 from typing import Protocol
 
 from smart_tool_creator.core.skill import DISTRIBUTION, repository_url
@@ -8,7 +11,12 @@ from smart_tool_creator.intelligence.schemas import AgentRequest, AgentResult
 from smart_tool_creator.schemas import AGENT_PROVIDERS, AgentProvider, SmartToolCreatorError
 
 # The import each agent provider's SDK answers to; its extra is named after the agent provider.
-SDK_MODULES: dict[AgentProvider, str] = {"copilot": "copilot", "amplifier-agent": "amplifier_agent"}
+SDK_MODULES: dict[AgentProvider, str] = {
+    "copilot": "copilot",
+    "amplifier-agent": "amplifier_agent",
+    "codex": "openai_codex",
+    "claude": "claude_agent_sdk",
+}
 
 
 class Intelligence(Protocol):
@@ -70,6 +78,14 @@ def resolve_intelligence(agent_provider: AgentProvider | None = None, model: str
             from smart_tool_creator.intelligence.amplifier_agent import AmplifierAgentIntelligence
 
             return AmplifierAgentIntelligence() if model is None else AmplifierAgentIntelligence(model)
+        case "codex":
+            from smart_tool_creator.intelligence.codex import CodexIntelligence
+
+            return CodexIntelligence()
+        case "claude":
+            from smart_tool_creator.intelligence.claude import ClaudeIntelligence
+
+            return ClaudeIntelligence()
 
 
 def select_intelligence(
@@ -89,6 +105,17 @@ def select_intelligence(
         model = default_models[agent_provider] if model is None else model
         return resolve_intelligence(agent_provider, model), model
     return intelligence, default_models[agent_provider or AGENT_PROVIDERS[0]] if model is None else model
+
+
+def state_directory(agent_provider: AgentProvider) -> Path:
+    """The platform's per-user state location for the agent provider, where what a later run resumes lives."""
+    if sys.platform == "win32":
+        base = Path(os.environ.get("LOCALAPPDATA") or Path.home() / "AppData" / "Local")
+    elif sys.platform == "darwin":
+        base = Path.home() / "Library" / "Application Support"
+    else:
+        base = Path(os.environ.get("XDG_STATE_HOME") or Path.home() / ".local" / "state")
+    return base / "smart-tool-creator" / agent_provider
 
 
 def _install_source(extra: str) -> str:

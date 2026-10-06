@@ -18,11 +18,14 @@ class Intelligence(Protocol):
 `preflight` raises `SmartToolCreatorError` naming what to configure when the implementation cannot run. 
 `run` executes one agent: `AgentRequest` holds the prompt, model, optional workspace, and optional output schema; `AgentResult` holds the text, structured output, or error. 
 Setting `AgentRequest.resume` to an earlier `AgentResult.session_id` continues that session instead of starting a fresh one, so the agent keeps what it learned.
+On `codex`, a request with a `workspace` runs in Codex's read-only sandbox unless `writable`, and with full access when it is.
 
 `resolve_intelligence(agent_provider)` returns a shipped implementation, one per agent provider, each installed through the extra of the same name:
 
 - `copilot`: `CopilotIntelligence`, built on the [GitHub Copilot SDK](https://github.com/github/copilot-sdk) and signed in through the GitHub CLI.
 - `amplifier-agent`: `AmplifierAgentIntelligence`, built on [Amplifier Agent](https://github.com/microsoft/amplifier-agent). The model is `<provider>/<model>`, and `reasoning_effort` is ignored. Sessions live under the platform's per-user state directory, in `smart-tool-creator/amplifier-agent`.
+- `codex`: `CodexIntelligence`, built on the [OpenAI Codex SDK](https://github.com/openai/codex/tree/main/sdk/python) and run with the user's Codex sign-in and `~/.codex/config.toml`. A session is a Codex thread, kept where Codex keeps its threads. An output schema is enforced by the model API in its strict form, every property required and an optional one nullable; the nulls are dropped before the answer is checked against the original schema.
+- `claude`: `ClaudeIntelligence`, built on the [Claude Agent SDK](https://github.com/anthropics/claude-agent-sdk-python) and run with the user's Claude Code settings and the credentials Claude Code resolves: `ANTHROPIC_API_KEY`, or a cloud provider's, as [its docs](https://code.claude.com/docs/en/agent-sdk/quickstart) describe. Sessions are kept where Claude Code keeps them; a plain completion runs in the platform's per-user state directory, in `smart-tool-creator/claude`.
 
 Without an agent provider named, the first installed in that order is used; one that is not installed raises `SmartToolCreatorError` with the command that installs it. 
 Another implementation is a module satisfying the protocol and a branch in that factory.
@@ -76,6 +79,12 @@ def skill_resources() -> list[str]
 
 
 def capability_skill_resources(capability: str) -> list[str]
+```
+
+The installed package's version, from its metadata.
+
+```python
+def version() -> str
 ```
 
 The tool's canonical source, read from the package metadata's `[project.urls]` `Repository` entry, or `None` when the package declares none. 
@@ -180,8 +189,8 @@ def check_spec_adherence(
 
 - `directory`: the tool's distribution root; the current directory when omitted. It must hold a `smart-tool.json` at its root, and no parent directory is searched.
 - `checks`: the ids to review, from the checklist below; every check when omitted.
-- `agent_provider`: `copilot` or `amplifier-agent`; the first installed when omitted.
-- `model` and `reasoning_effort`: the reviewers. `DEFAULT_REVIEW_MODELS` is `gpt-6.1-sol` on `copilot` and `openai/gpt-6.1-sol` on `amplifier-agent`, and `DEFAULT_REVIEW_REASONING_EFFORT` is `medium`. Effort is one of `low`, `medium`, `high`, `xhigh`, `max`, and applies to `copilot` only.
+- `agent_provider`: `copilot`, `amplifier-agent`, `codex`, or `claude`; the first installed when omitted.
+- `model` and `reasoning_effort`: the reviewers. `DEFAULT_REVIEW_MODELS` is `gpt-6.1-sol` on `copilot`, `openai/gpt-6.1-sol` on `amplifier-agent`, `gpt-6.1-sol` on `codex`, and `claude-opus-5-5` on `claude`, and `DEFAULT_REVIEW_REASONING_EFFORT` is `medium`. Effort is one of `low`, `medium`, `high`, `xhigh`, `max`, and applies to `copilot`, `codex`, and `claude`.
 - `intelligence`: the implementation to run through, which wins over `agent_provider`; `resolve_intelligence(agent_provider)` when omitted. Tests inject a fake.
 
 The kit runs first, through `check_conformance`. When its verdict is `FAIL`, no reviewer runs: the report carries the kit's verdict, no findings, and an `output_message` saying to fix the failing rules and call again. Judgment about a tool that fails the mechanical rules is spent on problems the kit has already named.
@@ -283,8 +292,8 @@ def add_smart_capability(
 - `request`: the whole brief for one capability: what it does, for whom, and what it takes in and gives back.
 - `directory`: the tool to work in; the current directory when omitted. It must hold a `smart-tool.json` at its root, and no parent directory is searched, so a workspace holding several tools can never be extended by accident.
 - `context`: repeatable free text, usually paths to notes, transcripts, or exemplars. The agent reads the paths itself, so name them rather than pasting their contents.
-- `agent_provider`: `copilot` or `amplifier-agent`; the first installed when omitted.
-- `model` and `reasoning_effort`: the agent behind the work. `DEFAULT_INTELLIGENCE_MODELS` is `gpt-6-astra` on `copilot` and `openai/gpt-6-astra` on `amplifier-agent`, and `DEFAULT_INTELLIGENCE_REASONING_EFFORT` is `high`. Effort is one of `low`, `medium`, `high`, `xhigh`, `max`, and applies to `copilot` only.
+- `agent_provider`: `copilot`, `amplifier-agent`, `codex`, or `claude`; the first installed when omitted.
+- `model` and `reasoning_effort`: the agent behind the work. `DEFAULT_INTELLIGENCE_MODELS` is `gpt-6-astra` on `copilot`, `openai/gpt-6-astra` on `amplifier-agent`, `gpt-6.1-sol` on `codex`, and `claude-opus-5-5` on `claude`, and `DEFAULT_INTELLIGENCE_REASONING_EFFORT` is `high`. Effort is one of `low`, `medium`, `high`, `xhigh`, `max`, and applies to `copilot`, `codex`, and `claude`.
 - `intelligence`: the implementation to run through, which wins over `agent_provider`; `resolve_intelligence(agent_provider)` when omitted. Tests inject a fake.
 
 After the agent finishes, the tool's own checks run in its root: `uv run pytest`, `prek run --all-files`, and the conformance kit through `check_conformance`. The prek check is `skipped`, never failed, when the tool has no `.pre-commit-config.yaml` or `prek` is not on `PATH`; the conformance check is `skipped` when the kit itself could not run, and when it fails its output is the failing rules with their details and spec sentences. While any check fails, another agent run gets the failing commands and their output and fixes them, up to `MAX_FIX_ROUNDS` (2). Each fix round continues the implementation run's session, so the agent still has the work it just did in context. Checks still failing after that are returned, not raised: the caller decides what the partial work is worth.

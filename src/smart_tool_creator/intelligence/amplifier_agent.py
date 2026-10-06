@@ -4,9 +4,7 @@ import asyncio
 import contextlib
 from importlib.metadata import version
 import json
-import os
 from pathlib import Path
-import sys
 import tempfile
 import threading
 import time
@@ -28,6 +26,7 @@ from amplifier_agent import (
 )
 from liquid import render
 
+from smart_tool_creator.intelligence.interface import state_directory
 from smart_tool_creator.intelligence.schemas import AgentRequest, AgentResult
 from smart_tool_creator.intelligence.submission import (
     MAX_INVALID_SUBMISSIONS,
@@ -111,7 +110,7 @@ class AmplifierAgentIntelligence:
             provider=provider,
             model=model,
             tools=tools,
-            storage=storage_directory(),
+            storage=state_directory("amplifier-agent"),
             approvals="allow",
             # The default, "stop", ends the turn on any failed tool call, including a rejected submission.
             tool_error_policy="continue",
@@ -171,17 +170,6 @@ def parse_model(model: str) -> tuple[str, str]:
     return provider, name
 
 
-def storage_directory() -> Path:
-    """The platform's per-user state location, where durable sessions live so a later run can resume one."""
-    if sys.platform == "win32":
-        base = Path(os.environ.get("LOCALAPPDATA") or Path.home() / "AppData" / "Local")
-    elif sys.platform == "darwin":
-        base = Path.home() / "Library" / "Application Support"
-    else:
-        base = Path(os.environ.get("XDG_STATE_HOME") or Path.home() / ".local" / "state")
-    return base / "smart-tool-creator" / "amplifier-agent"
-
-
 def describe(error: AgentError) -> str:
     return f"{error.code}: {error.message} {error.remedy}"
 
@@ -217,5 +205,7 @@ async def _session(agent: Agent, resume: str | None) -> Session:
 
 
 async def _probe(provider: str, model: str) -> None:
-    agent = await create_agent(AgentOptions(provider=provider, model=model, tools=[], storage=storage_directory()))
+    agent = await create_agent(
+        AgentOptions(provider=provider, model=model, tools=[], storage=state_directory("amplifier-agent"))
+    )
     await agent.close()

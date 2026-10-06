@@ -12,6 +12,7 @@ from typer.core import TyperCommand, TyperOption
 from typer.models import CommandFunctionType
 
 from smart_tool_creator import lib
+from smart_tool_creator.core.skill import DISTRIBUTION
 from smart_tool_creator.schemas import (
     DEFAULT_INTELLIGENCE_MODELS,
     DEFAULT_INTELLIGENCE_REASONING_EFFORT,
@@ -26,16 +27,19 @@ from smart_tool_creator.schemas import (
 )
 
 AGENT_PROVIDER_HELP = (
-    "What the model-backed work runs through: copilot (GitHub Copilot, signed in as the GitHub CLI's user) or "
-    "amplifier-agent (Amplifier Agent, with the model provider's credentials). The first installed, in that order, "
-    "when omitted."
+    "What the model-backed work runs through: copilot (GitHub Copilot, signed in as the GitHub CLI's user), "
+    "amplifier-agent (Amplifier Agent, with the model provider's credentials), codex (OpenAI Codex, with the "
+    "Codex sign-in), or claude (Claude Agent SDK). The first installed, in that order, when omitted."
 )
-REASONING_EFFORT_NOTE = "Applies to the copilot agent provider only."
+REASONING_EFFORT_NOTE = "Applies to the copilot, codex, and claude agent providers."
 
 
 def _model_help(defaults: dict[AgentProvider, str]) -> str:
     named = "; ".join(f"{agent_provider}: {model}" for agent_provider, model in defaults.items())
-    return f"A Copilot model id for copilot, <provider>/<model> for amplifier-agent. Defaults to {named}."
+    return (
+        "A Copilot model id for copilot, <provider>/<model> for amplifier-agent, a Codex model id for codex, a "
+        f"Claude model id for claude. Defaults to {named}."
+    )
 
 
 class CapabilityCommand(TyperCommand):
@@ -103,8 +107,18 @@ def _print_skill(value: bool) -> None:
         raise typer.Exit()
 
 
+def _print_version(value: bool) -> None:
+    if value:
+        typer.echo(f"{DISTRIBUTION} {lib.version()}")
+        raise typer.Exit()
+
+
 @app.callback()
 def cli(
+    version: Annotated[
+        bool,
+        typer.Option("--version", "-V", is_eager=True, callback=_print_version, help="Print the version and exit."),
+    ] = False,
     help: Annotated[
         bool,
         typer.Option(
@@ -202,7 +216,7 @@ def check_spec_adherence(
         ),
     ] = DEFAULT_REVIEW_REASONING_EFFORT,
 ) -> None:
-    """Review a smart tool against the parts of the spec the conformance kit cannot decide, and suggest fixes. Model-backed: runs through GitHub Copilot or Amplifier Agent, whichever --agent-provider names."""
+    """Review a smart tool against the parts of the spec the conformance kit cannot decide, and suggest fixes. Model-backed: runs through GitHub Copilot, Amplifier Agent, Codex, or Claude, whichever --agent-provider names."""
     report = lib.check_spec_adherence(
         directory=directory,
         checks=check,
@@ -240,7 +254,7 @@ def add_smart_capability(
         typer.Option("--reasoning-effort", help=f"How hard the model thinks before it acts. {REASONING_EFFORT_NOTE}"),
     ] = DEFAULT_INTELLIGENCE_REASONING_EFFORT,
 ) -> None:
-    """Add one model-backed capability to an existing smart tool: library, CLI, tests, and docs, verified against the tool's own checks. Model-backed: runs through GitHub Copilot or Amplifier Agent, whichever --agent-provider names."""
+    """Add one model-backed capability to an existing smart tool: library, CLI, tests, and docs, verified against the tool's own checks. Model-backed: runs through GitHub Copilot, Amplifier Agent, Codex, or Claude, whichever --agent-provider names."""
     added = lib.add_smart_capability(
         request,
         directory=directory,
