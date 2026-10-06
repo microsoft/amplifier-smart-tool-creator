@@ -1,6 +1,6 @@
 [project]
 name = "amplifier-smart-tool-creator"
-version = "0.2.0"
+version = "0.2.1"
 description = "A smart tool that helps you create, validate, and evaluate smart tools"
 readme = "README.md"
 authors = [
