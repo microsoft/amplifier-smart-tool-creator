@@ -52,10 +52,16 @@ def only_installed(monkeypatch: pytest.MonkeyPatch, *agent_providers: AgentProvi
 @pytest.mark.parametrize(
     ("installed", "named", "picked"),
     [
-        (("copilot", "amplifier-agent"), None, "copilot"),
+        (("copilot", "amplifier-agent", "codex", "claude"), None, "copilot"),
         (("copilot",), None, "copilot"),
         (("amplifier-agent",), None, "amplifier-agent"),
+        (("codex",), None, "codex"),
+        (("amplifier-agent", "codex"), None, "amplifier-agent"),
+        (("claude",), None, "claude"),
+        (("codex", "claude"), None, "codex"),
         (("copilot", "amplifier-agent"), "amplifier-agent", "amplifier-agent"),
+        (("copilot", "amplifier-agent", "codex"), "codex", "codex"),
+        (("copilot", "amplifier-agent", "codex", "claude"), "claude", "claude"),
     ],
 )
 def test_a_named_agent_provider_wins_and_otherwise_the_first_installed_is_picked(
@@ -71,7 +77,13 @@ def test_a_named_agent_provider_wins_and_otherwise_the_first_installed_is_picked
 
 @pytest.mark.parametrize(
     ("named", "extras"),
-    [(None, ["all", "copilot", "amplifier-agent"]), ("copilot", ["copilot"]), ("amplifier-agent", ["amplifier-agent"])],
+    [
+        (None, ["all", "copilot", "amplifier-agent", "codex", "claude"]),
+        ("copilot", ["copilot"]),
+        ("amplifier-agent", ["amplifier-agent"]),
+        ("codex", ["codex"]),
+        ("claude", ["claude"]),
+    ],
 )
 def test_a_missing_agent_provider_names_the_install_command(
     monkeypatch: pytest.MonkeyPatch, named: AgentProvider | None, extras: list[str]
@@ -150,3 +162,13 @@ def test_the_cli_passes_the_agent_provider_and_model_through(monkeypatch: pytest
     assert result.exit_code == 0
     assert received["agent_provider"] == "amplifier-agent"
     assert received["model"] == "anthropic/claude-opus-5"
+
+
+@pytest.mark.parametrize("agent_provider", ["amplifier-agent", "claude"])
+def test_state_lives_in_the_platform_state_directory_under_the_tool(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, agent_provider: AgentProvider
+) -> None:
+    monkeypatch.setattr(interface.sys, "platform", "linux")
+    monkeypatch.setenv("XDG_STATE_HOME", str(tmp_path))
+
+    assert interface.state_directory(agent_provider) == tmp_path / "smart-tool-creator" / agent_provider

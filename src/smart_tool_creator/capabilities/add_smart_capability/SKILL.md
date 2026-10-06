@@ -43,12 +43,14 @@ added.report, added.checks, added.fix_rounds, added.output_message
   first installed, in that order, when omitted.
 - `--model`: the model the agent runs on: a Copilot model id for `copilot`,
   `<provider>/<model>` for `amplifier-agent` (for instance
-  `{{ default_intelligence_models["amplifier-agent"] }}`). Defaults to
-  `{{ default_intelligence_models.copilot }}` on `copilot` and
-  `{{ default_intelligence_models["amplifier-agent"] }}` on `amplifier-agent`.
+  `{{ default_intelligence_models["amplifier-agent"] }}`), a Codex model id for `codex`, a
+  Claude model id for `claude`. Defaults to `{{ default_intelligence_models.copilot }}` on
+  `copilot`, `{{ default_intelligence_models["amplifier-agent"] }}` on `amplifier-agent`,
+  `{{ default_intelligence_models.codex }}` on `codex`, and
+  `{{ default_intelligence_models.claude }}` on `claude`.
 - `--reasoning-effort`: how hard the model thinks before it acts, one of `low`, `medium`,
   `high`, `xhigh`, `max`. Defaults to `{{ default_intelligence_reasoning_effort }}`. Applies to
-  the `copilot` agent provider only.
+  the `copilot`, `codex`, and `claude` agent providers.
 - `intelligence`, library only: the `Intelligence` implementation the agent runs through,
   which wins over `agent_provider`; `resolve_intelligence(agent_provider)` when omitted. Tests
   inject a fake.

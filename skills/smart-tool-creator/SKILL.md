@@ -23,25 +23,14 @@ the spec, and evaluates a tool's model-backed capabilities in isolation.
 ## Install
 
 ```bash
-# as a CLI
-uv tool install "amplifier-smart-tool-creator[all] @ git+https://github.com/microsoft/amplifier-smart-tool-creator"
+# as a CLI, choosing the agent provider(s) you want
+uv tool install "amplifier-smart-tool-creator[all | copilot | amplifier-agent | codex | claude] @ git+https://github.com/microsoft/amplifier-smart-tool-creator"
 
 # as a library
 uv add "amplifier-smart-tool-creator[all] @ git+https://github.com/microsoft/amplifier-smart-tool-creator"
 
 # once, without installing
 uvx --from "amplifier-smart-tool-creator[all] @ git+https://github.com/microsoft/amplifier-smart-tool-creator" smart-tool-creator --help
-```
-
-`[all]` brings both agent providers the model-backed capabilities run through. Alternatives:
-
-```bash
-# Only the GitHub Copilot agent provider
-uv tool install "amplifier-smart-tool-creator[copilot] @ git+https://github.com/microsoft/amplifier-smart-tool-creator"
-# Only the Amplifier Agent agent provider
-uv tool install "amplifier-smart-tool-creator[amplifier-agent] @ git+https://github.com/microsoft/amplifier-smart-tool-creator"
-# Deterministic capabilities only
-uv tool install git+https://github.com/microsoft/amplifier-smart-tool-creator
 ```
 
 ## Use it

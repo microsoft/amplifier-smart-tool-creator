@@ -45,12 +45,15 @@ report.counts, report.deviating, report.findings, report.output_message
 - `--agent-provider`: what the agent runs through, `{{ agent_providers | join: "` or `" }}`. The
   first installed, in that order, when omitted.
 - `--model`: the model the reviewers run on: a Copilot model id for `copilot`,
-  `<provider>/<model>` for `amplifier-agent` (for instance `anthropic/claude-opus-5`).
-  Defaults to `{{ default_review_models.copilot }}` on `copilot` and
-  `{{ default_review_models["amplifier-agent"] }}` on `amplifier-agent`.
+  `<provider>/<model>` for `amplifier-agent` (for instance `anthropic/claude-opus-5`), a
+  Codex model id for `codex`, a Claude model id for `claude`.
+  Defaults to `{{ default_review_models.copilot }}` on `copilot`,
+  `{{ default_review_models["amplifier-agent"] }}` on `amplifier-agent`,
+  `{{ default_review_models.codex }}` on `codex`, and
+  `{{ default_review_models.claude }}` on `claude`.
 - `--reasoning-effort`: how hard the model thinks before it answers, one of `low`, `medium`,
   `high`, `xhigh`, `max`. Defaults to `{{ default_review_reasoning_effort }}`. Applies to the
-  `copilot` agent provider only.
+  `copilot`, `codex`, and `claude` agent providers.
 - `intelligence`, library only: the `Intelligence` implementation the reviewers run through,
   which wins over `agent_provider`; `resolve_intelligence(agent_provider)` when omitted. Tests
   inject a fake.
@@ -116,7 +119,11 @@ through GitHub Copilot, signed in as the GitHub CLI's user, so `gh` must be inst
 `gh auth login` completed with an account that has a Copilot subscription. `amplifier-agent`
 runs through Amplifier Agent and needs the credentials of the model provider `--model` names,
 for instance `OPENAI_API_KEY` for `openai/...`; see
-https://github.com/microsoft/amplifier-agent/blob/main/docs/providers.md. An agent provider
+https://github.com/microsoft/amplifier-agent/blob/main/docs/providers.md. `codex` runs
+through OpenAI Codex, with the Codex CLI signed in with ChatGPT or an API key; see
+https://developers.openai.com/codex/auth. `claude` runs through the Claude Agent SDK and
+needs `ANTHROPIC_API_KEY` or a cloud provider's credentials; see
+https://code.claude.com/docs/en/agent-sdk/quickstart. An agent provider
 that is not installed fails with the command that installs it. With nothing configured it
 fails immediately and names what to set; it never falls back to a deterministic answer.
 

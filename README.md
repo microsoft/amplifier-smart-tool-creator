@@ -2,20 +2,30 @@
 
 [Explore the website](https://microsoft.github.io/amplifier-smart-tool-creator/)
 
-Smart Tool Creator is the [Smart Tool](https://github.com/microsoft/amplifier-smart-tools) for building smart tools.
-It scaffolds the structure the spec requires, checks a tool against the spec and its conformance kit, and evaluates a tool's model-backed capabilities in isolation.
-The intelligence inside runs through an agent provider, the [GitHub Copilot SDK](https://github.com/github/copilot-sdk) or [Amplifier Agent](https://github.com/microsoft/amplifier-agent), behind an interface that other agent SDKs can implement.
+Smart Tool Creator builds [smart tools](https://github.com/microsoft/amplifier-smart-tools). It scaffolds the structure the spec requires, checks a tool against the spec's conformance kit, reviews it against the parts of the spec the kit cannot decide, and adds model-backed capabilities to it.
+
+We support [GitHub Copilot SDK](https://github.com/github/copilot-sdk), [Amplifier Agent](https://github.com/microsoft/amplifier-agent), the [OpenAI Codex SDK](https://github.com/openai/codex/tree/main/sdk/python), and the [Claude Agent SDK](https://github.com/anthropics/claude-agent-sdk-python).
 
 ## Installation
 
 Prerequisites:
-- Requires [uv](https://docs.astral.sh/uv/getting-started/installation/) 0.9.17 or newer.
-- For the intelligent features, one of:
+- [uv](https://docs.astral.sh/uv/getting-started/installation/) 0.9.17 or newer
+- For the model-backed capabilities, one of:
   - `copilot` agent provider: [GitHub CLI](https://cli.github.com/) signed in to an account with a [GitHub Copilot subscription](https://github.com/github/copilot-cli#prerequisites).
   - `amplifier-agent` agent provider: the model provider's credentials, for instance `OPENAI_API_KEY` for the default `openai/...` models. See [providers](https://github.com/microsoft/amplifier-agent/blob/main/docs/providers.md).
+  - `codex` agent provider: the [Codex CLI](https://github.com/openai/codex) signed in with ChatGPT or an API key. See [authentication](https://developers.openai.com/codex/auth).
+  - `claude` agent provider: `ANTHROPIC_API_KEY`, or any of its other supported modes of [authentication](https://code.claude.com/docs/en/agent-sdk/quickstart).
+- (Optional) Install the Smart Tools skill so your agent knows about Smart Tools: `npx skills add microsoft/amplifier-smart-tools`
+
+To get started:
 
 ```bash
-uv tool install "amplifier-smart-tool-creator[all] @ git+https://github.com/microsoft/amplifier-smart-tool-creator"
+# Install the Agent Skill so your agent knows about it.
+npx skills add microsoft/amplifier-smart-tool-creator
+# Install the tool, choosing the provider(s) you want
+uv tool install "amplifier-smart-tool-creator[all | copilot | amplifier-agent | codex | claude] @ git+https://github.com/microsoft/amplifier-smart-tool-creator"
+# Check the install; needs no credentials
+smart-tool-creator manifest
 ```
 
 To use it as a library:
@@ -24,41 +34,18 @@ To use it as a library:
 uv add "amplifier-smart-tool-creator[all] @ git+https://github.com/microsoft/amplifier-smart-tool-creator"
 ```
 
-To run it once without installing:
-
-```bash
-uvx --from "amplifier-smart-tool-creator[all] @ git+https://github.com/microsoft/amplifier-smart-tool-creator" smart-tool-creator --help
-```
-
-`[all]` brings both agent providers. Alternatives:
-
-```bash
-# Only the GitHub Copilot agent provider
-uv tool install "amplifier-smart-tool-creator[copilot] @ git+https://github.com/microsoft/amplifier-smart-tool-creator"
-# Only the Amplifier Agent agent provider
-uv tool install "amplifier-smart-tool-creator[amplifier-agent] @ git+https://github.com/microsoft/amplifier-smart-tool-creator"
-# Deterministic capabilities only
-uv tool install git+https://github.com/microsoft/amplifier-smart-tool-creator
-```
-
-To teach a coding agent how to use it, install the [skill](skills/smart-tool-creator/SKILL.md):
-
-```bash
-npx skills add microsoft/amplifier-smart-tool-creator
-```
-
 To update:
 
 ```bash
+npx skills update smart-tool-creator   # add -g for global installs
 uv tool upgrade amplifier-smart-tool-creator
-npx skills update smart-tool-creator   # add --global if the skill was installed globally
 ```
 
 To uninstall:
 
 ```bash
+npx skills remove smart-tool-creator   # add -g for global installs
 uv tool uninstall amplifier-smart-tool-creator
-npx skills remove smart-tool-creator   # add --global if the skill was installed globally
 ```
 
 ## Interface
@@ -73,23 +60,21 @@ smart-tool-creator init incident-postmortem --description "Writes, reviews, and 
 # Run the conformance kit against a smart tool
 smart-tool-creator check-conformance --directory ./incident-postmortem
 
-# Review a smart tool against the parts of the spec the kit cannot decide, and get suggestions
+# Review a smart tool against the parts of the spec the kit cannot decide, and get suggestions (model-backed)
 smart-tool-creator check-spec-adherence --directory ./incident-postmortem
 
 # The same review through Amplifier Agent on another model
 smart-tool-creator check-spec-adherence --directory ./incident-postmortem --agent-provider amplifier-agent --model anthropic/claude-opus-5
 
-# Add one model-backed capability to an existing smart tool, verified against that tool's own checks
+# Add one model-backed capability to an existing smart tool, verified against that tool's own checks (model-backed)
 smart-tool-creator add-smart-capability "Given an incident id, fetch its chat transcript and alert timeline from the incident platform and draft a blameless postmortem: summary, impact, contributing factors, and action items with owners" --directory ./incident-postmortem
 ```
 
 See the [CLI reference](docs/02-cli.md) for every flag and the [library reference](docs/01-library.md) for the Python surface.
 
-## Development
+## Contributing
 
 See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) for details on how to set up your development environment.
-
-## Contributing
 
 > [!NOTE]
 > This project is not currently accepting external contributions, but we're actively working toward opening this up. We value community input and look forward to collaborating in the future. For now, feel free to fork and experiment!

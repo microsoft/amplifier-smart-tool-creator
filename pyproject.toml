@@ -1,6 +1,6 @@
 [project]
 name = "amplifier-smart-tool-creator"
-version = "0.1.1"
+version = "0.2.0"
 description = "A smart tool that helps you create, validate, and evaluate smart tools"
 readme = "README.md"
 authors = [
@@ -28,8 +28,14 @@ copilot = [
 amplifier-agent = [
     "amplifier-agent @ git+https://github.com/microsoft/amplifier-agent@v0.20.0#subdirectory=packages/python",
 ]
+codex = [
+    "openai-codex>=0.159.2,<1.0.0",
+]
+claude = [
+    "claude-agent-sdk>=0.2.163,<0.3.0",
+]
 all = [
-    "amplifier-smart-tool-creator[copilot,amplifier-agent]",
+    "amplifier-smart-tool-creator[copilot,amplifier-agent,codex,claude]",
 ]
 
 [build-system]
