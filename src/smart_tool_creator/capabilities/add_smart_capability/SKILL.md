@@ -35,7 +35,9 @@ added.report, added.checks, added.fix_rounds, added.output_message
   and gives back. Required.
 - `--directory PATH`: the smart tool to work in; the current directory when omitted. It must
   hold a `smart-tool.json` at its root, and no parent is searched, so a workspace holding
-  several tools is never extended by accident.
+  several tools is never extended by accident. It must also have an `Intelligence` interface
+  at `src/<package>/intelligence/interface.py` for the capability to run through, which a
+  tool scaffolded with `--no-agent-providers` does not.
 - `--context TEXT`: repeatable free text, usually paths to notes, transcripts, or exemplars
   the agent should read before it designs anything. It reads the paths itself, so name them
   rather than pasting their contents.

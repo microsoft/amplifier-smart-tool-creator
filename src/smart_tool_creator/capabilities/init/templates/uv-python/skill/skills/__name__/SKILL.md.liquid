@@ -15,14 +15,14 @@ metadata:
 ## Install
 
 ```bash
-# as a CLI
-uv tool install git+{{ repository }}
+# as a CLI{% if agent_providers.size > 1 %}, choosing the agent provider(s) you want{% endif %}
+uv tool install {{ tool_source }}
 
 # as a library, from another project
-uv add "{{ name }} @ git+{{ repository }}"
+uv add {{ library_source }}
 
 # once, without installing
-uvx --from git+{{ repository }} {{ name }} --help
+uvx --from {{ run_source }} {{ name }} --help
 ```
 ## Use it
 

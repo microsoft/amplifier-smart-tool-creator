@@ -78,7 +78,15 @@ class Capability(NamedTuple):
 # region: Init
 
 Language = Literal["uv-python"]
-IntelligenceLayer = Literal["copilot-sdk"]
+
+
+class AgentProviderSdk(NamedTuple):
+    """What a scaffolded tool needs to ship one agent provider."""
+
+    title: str  # how prose names it, as in "runs through GitHub Copilot"
+    module: str  # the import the SDK answers to
+    requirement: str  # the dependency its extra installs
+    repository: str  # cloned into reference/ for the agent developing the tool
 
 
 class Scaffold(BaseModel):

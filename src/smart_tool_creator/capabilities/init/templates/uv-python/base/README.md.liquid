@@ -2,28 +2,37 @@
 
 {{ description }}.
 
-{{ title }} is a [Smart Tool](https://github.com/microsoft/amplifier-smart-tools): a library with a thin CLI over it, whose model-backed capabilities sit behind an interface.
+{{ title }} is a [Smart Tool](https://github.com/microsoft/amplifier-smart-tools): a library with a thin CLI over it{% if agent_providers != empty %}, whose model-backed capabilities sit behind an interface{% endif %}.
 
 ## Installation
 
 Prerequisites:
 - [uv](https://docs.astral.sh/uv/getting-started/installation/).
-- [GitHub CLI](https://cli.github.com/) signed in to an account with a [GitHub Copilot subscription](https://github.com/github/copilot-cli#prerequisites) for the model-backed capabilities.
-
+{%- if agent_providers.size > 1 %}
+- For the model-backed capabilities, one of:
+{%- elsif agent_providers.size == 1 %}
+- For the model-backed capabilities:
+{%- endif %}
+{% if agent_providers contains "copilot" %}  - `copilot` agent provider: [GitHub CLI](https://cli.github.com/) signed in to an account with a [GitHub Copilot subscription](https://github.com/github/copilot-cli#prerequisites).
+{% endif %}{% if agent_providers contains "amplifier-agent" %}  - `amplifier-agent` agent provider: the model provider's credentials, for instance `OPENAI_API_KEY` for the default `openai/...` models. See [providers](https://github.com/microsoft/amplifier-agent/blob/v0.22.0/docs/providers.md).
+{% endif %}{% if agent_providers contains "codex" %}  - `codex` agent provider: the [Codex CLI](https://github.com/openai/codex) signed in with ChatGPT or an API key. See [authentication](https://developers.openai.com/codex/auth).
+{% endif %}{% if agent_providers contains "claude" %}  - `claude` agent provider: `ANTHROPIC_API_KEY`, or any of its other supported modes of [authentication](https://code.claude.com/docs/en/agent-sdk/quickstart).
+{% endif %}
 ```bash
-uv tool install git+{{ repository }}
+{% if agent_providers.size > 1 %}# Install the tool, choosing the provider(s) you want
+{% endif %}uv tool install {{ tool_source }}
 ```
 
 To use it as a library:
 
 ```bash
-uv add "{{ name }} @ git+{{ repository }}"
+uv add {{ library_source }}
 ```
 
 To run it once without installing:
 
 ```bash
-uvx --from git+{{ repository }} {{ name }} --help
+uvx --from {{ run_source }} {{ name }} --help
 ```
 {% if skill %}
 To teach a coding agent how to use it, install the [skill](skills/{{ name }}/SKILL.md):
@@ -36,19 +45,15 @@ To update:
 
 ```bash
 uv tool upgrade {{ name }}
-{%- if skill %}
-npx skills update {{ name }}   # add --global if the skill was installed globally
-{%- endif %}
-```
+{% if skill %}npx skills update {{ name }}   # add --global if the skill was installed globally
+{% endif %}```
 
 To uninstall:
 
 ```bash
 uv tool uninstall {{ name }}
-{%- if skill %}
-npx skills remove {{ name }}   # add --global if the skill was installed globally
-{%- endif %}
-```
+{% if skill %}npx skills remove {{ name }}   # add --global if the skill was installed globally
+{% endif %}```
 
 Verify an install with `{{ name }} manifest`, which needs no credentials.
 

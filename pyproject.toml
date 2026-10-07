@@ -1,6 +1,6 @@
 [project]
 name = "amplifier-smart-tool-creator"
-version = "0.2.1"
+version = "0.3.0"
 description = "A smart tool that helps you create, validate, and evaluate smart tools"
 readme = "README.md"
 authors = [
@@ -51,7 +51,9 @@ default-groups = "all"
 exclude-newer = "5 days"
 
 [dependency-groups]
+# Every agent provider, so `uv run` type checks and tests each implementation without asking for extras.
 dev = [
+    "amplifier-smart-tool-creator[all]",
     "pytest>=9.1",
     "pytest-asyncio>=1.4",
     "ruff>=0.16",

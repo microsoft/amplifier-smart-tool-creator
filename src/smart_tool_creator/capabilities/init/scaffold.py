@@ -9,7 +9,16 @@ import subprocess
 
 from liquid import Environment, StrictUndefined
 
-from smart_tool_creator.schemas import SLUG_PATTERN, IntelligenceLayer, Language, Scaffold, SmartToolCreatorError
+from smart_tool_creator.schemas import (
+    AGENT_PROVIDERS,
+    DEFAULT_INTELLIGENCE_MODELS,
+    SLUG_PATTERN,
+    AgentProvider,
+    AgentProviderSdk,
+    Language,
+    Scaffold,
+    SmartToolCreatorError,
+)
 
 TEMPLATES_ROOT = Path(__file__).parent / "templates"
 OUTPUT_MESSAGE_PATH = Path(__file__).parent / "output_message.md.liquid"
@@ -21,12 +30,38 @@ INITIAL_VERSION = "0.1.0"
 PYTHON_VERSION = "3.13"
 
 BASE_DEPENDENCIES = ["pydantic>=2.13,<3.0", "pyyaml>=6.0.3,<7.0.0", "typer>=0.27.2,<0.28.0"]
-INTELLIGENCE_DEPENDENCIES: dict[str, list[str]] = {
-    "copilot-sdk": ["github-copilot-sdk>=1.0.13,<2.0.0", "jsonschema>=4.26.0,<5.0.0"]
+# Every agent provider's SDK is an optional extra of its own; this is what their shared code needs.
+INTELLIGENCE_DEPENDENCIES = ["jsonschema>=4.26.0,<5.0.0"]
+AGENT_PROVIDER_SDKS: dict[AgentProvider, AgentProviderSdk] = {
+    "copilot": AgentProviderSdk(
+        title="GitHub Copilot",
+        module="copilot",
+        requirement="github-copilot-sdk>=1.0.13,<2.0.0",
+        repository="https://github.com/github/copilot-sdk",
+    ),
+    "amplifier-agent": AgentProviderSdk(
+        title="Amplifier Agent",
+        module="amplifier_agent",
+        requirement="amplifier-agent @ git+https://github.com/microsoft/amplifier-agent@v0.22.0#subdirectory=packages/python",
+        repository="https://github.com/microsoft/amplifier-agent",
+    ),
+    "codex": AgentProviderSdk(
+        title="Codex",
+        module="openai_codex",
+        requirement="openai-codex>=0.159.2,<1.0.0",
+        repository="https://github.com/openai/codex",
+    ),
+    "claude": AgentProviderSdk(
+        title="Claude",
+        module="claude_agent_sdk",
+        requirement="claude-agent-sdk>=0.2.163,<0.3.0",
+        repository="https://github.com/anthropics/claude-agent-sdk-python",
+    ),
 }
+# The agent providers that keep state under the platform's per-user state directory.
+STATEFUL_AGENT_PROVIDERS: tuple[AgentProvider, ...] = ("amplifier-agent", "claude")
 
 SPEC_REPOSITORY = "https://github.com/microsoft/amplifier-smart-tools"
-INTELLIGENCE_REPOSITORIES: dict[str, str] = {"copilot-sdk": "https://github.com/github/copilot-sdk"}
 SKILL_REPOSITORY = "https://github.com/agentskills/agentskills"
 # Stands in for the tool's remote until there is one, so every install instruction is already in its final shape.
 PLACEHOLDER_REPOSITORY = "https://github.com/<owner>/{name}"
@@ -39,7 +74,7 @@ def init(
     description: str,
     directory: Path | None = None,
     language: Language = "uv-python",
-    intelligence: IntelligenceLayer = "copilot-sdk",
+    agent_providers: list[AgentProvider] | None = None,
     skill: bool = False,
     repository: str | None = None,
 ) -> Scaffold:
@@ -49,16 +84,20 @@ def init(
     description = " ".join(description.split()).rstrip(".")
     if repository is not None:
         repository = repository.strip().rstrip("/").removesuffix(".git")
-    _preflight(name, description, root, repository)
+    _preflight(name, description, root, repository, agent_providers)
+    chosen = list(AGENT_PROVIDERS) if agent_providers is None else _in_order(agent_providers)
     placeholder = repository is None
     if repository is None:
         repository = PLACEHOLDER_REPOSITORY.format(name=name)
 
-    references = reference_repositories(intelligence, skill)
-    sources = [TEMPLATES_ROOT / language / "base", TEMPLATES_ROOT / language / "intelligence" / intelligence]
+    references = reference_repositories(chosen, skill)
+    sources = [TEMPLATES_ROOT / language / "base"]
+    if chosen:
+        intelligence = TEMPLATES_ROOT / language / "intelligence"
+        sources += [intelligence / "shared", *(intelligence / agent_provider for agent_provider in chosen)]
     if skill:
         sources.append(TEMPLATES_ROOT / language / "skill")
-    variables = _variables(name, description, intelligence, references, skill, repository, placeholder)
+    variables = _variables(name, description, chosen, references, skill, repository, placeholder)
 
     files = sorted(file for source in sources for file in _render(source, root, variables))
     _git(["init", "--initial-branch=main"], root, "Could not create the git repository; check that git can write here")
@@ -68,7 +107,19 @@ def init(
             root,
             f"Could not add {repository} as the remote; check the URL",
         )
-    _run(["uv", "sync"], root, "Could not sync the new tool's environment; check that uv can reach the package index")
+    _run(
+        ["uv", "sync", "--all-extras"],
+        root,
+        "Could not sync the new tool's environment; check that uv can reach the package index",
+    )
+    # Whether an import fits on one line depends on the package name, so the rendered code is settled by the
+    # same fixers its hooks run; otherwise the first `prek run` would rewrite a fresh tool.
+    for fixer in (["check", "--fix", "--quiet"], ["format", "--quiet"]):
+        _run(
+            ["uv", "run", "ruff", *fixer, "--force-exclude", "--config", "pyproject.toml"],
+            root,
+            "Could not settle the new tool's code style with ruff",
+        )
     for reference in references:
         destination = Path("reference") / reference.rsplit("/", 1)[-1]
         _git(
@@ -87,21 +138,25 @@ def init(
         root=str(root),
         files=[str(file) for file in files],
         language=language,
-        intelligence=intelligence,
         **variables,
     ).rstrip()
     return Scaffold(root=root, files=files, references=references, output_message=output_message)
 
 
-def reference_repositories(intelligence: IntelligenceLayer, skill: bool) -> list[str]:
+def reference_repositories(agent_providers: list[AgentProvider], skill: bool) -> list[str]:
     """The repositories an agent developing the new tool should read rather than recall."""
-    references = [SPEC_REPOSITORY, INTELLIGENCE_REPOSITORIES[intelligence]]
+    references = [
+        SPEC_REPOSITORY,
+        *(AGENT_PROVIDER_SDKS[agent_provider].repository for agent_provider in agent_providers),
+    ]
     if skill:
         references.append(SKILL_REPOSITORY)
     return references
 
 
-def _preflight(name: str, description: str, root: Path, repository: str | None) -> None:
+def _preflight(
+    name: str, description: str, root: Path, repository: str | None, agent_providers: list[AgentProvider] | None
+) -> None:
     """Everything that can be known before a file is written, so a failure leaves no half-built tool."""
     if re.match(SLUG_PATTERN, name) is None:
         raise SmartToolCreatorError(
@@ -116,6 +171,19 @@ def _preflight(name: str, description: str, root: Path, repository: str | None) 
             f"'{repository}' is not a usable repository URL. Give the https:// URL the tool will be cloned from, "
             "as in 'https://github.com/org/incident-postmortem'."
         )
+    if agent_providers is not None:
+        known = ", ".join(AGENT_PROVIDERS)
+        unknown = [agent_provider for agent_provider in agent_providers if agent_provider not in AGENT_PROVIDERS]
+        if unknown:
+            raise SmartToolCreatorError(
+                f"Not an agent provider: {', '.join(unknown)}. Choose from {known}, or none for a tool whose "
+                "capabilities are all deterministic."
+            )
+        repeated = sorted(
+            {agent_provider for agent_provider in agent_providers if agent_providers.count(agent_provider) > 1}
+        )
+        if repeated:
+            raise SmartToolCreatorError(f"Named more than once: {', '.join(repeated)}. Name each agent provider once.")
     if root.exists():
         if not root.is_dir():
             raise SmartToolCreatorError(f"{root} is a file. Choose a directory that does not exist or is empty.")
@@ -136,7 +204,7 @@ def _preflight(name: str, description: str, root: Path, repository: str | None) 
 def _variables(
     name: str,
     description: str,
-    intelligence: IntelligenceLayer,
+    agent_providers: list[AgentProvider],
     references: list[str],
     skill: bool,
     repository: str,
@@ -156,13 +224,62 @@ def _variables(
         "description_docstring": _docstring(description),
         "version": INITIAL_VERSION,
         "python_version": PYTHON_VERSION,
-        "dependencies": sorted(BASE_DEPENDENCIES + INTELLIGENCE_DEPENDENCIES[intelligence]),
+        "dependencies": sorted(BASE_DEPENDENCIES + (INTELLIGENCE_DEPENDENCIES if agent_providers else [])),
+        "agent_providers": agent_providers,
+        "stateful_agent_providers": [
+            agent_provider for agent_provider in agent_providers if agent_provider in STATEFUL_AGENT_PROVIDERS
+        ],
+        "sdk_modules": {
+            agent_provider: AGENT_PROVIDER_SDKS[agent_provider].module for agent_provider in agent_providers
+        },
+        "agent_provider_requirements": {
+            agent_provider: AGENT_PROVIDER_SDKS[agent_provider].requirement for agent_provider in agent_providers
+        },
+        "default_models": {
+            agent_provider: DEFAULT_INTELLIGENCE_MODELS[agent_provider] for agent_provider in agent_providers
+        },
+        # What the install message names when no agent provider is installed; with one, `all` is the only extra.
+        "none_installed_extras": ["all", *agent_providers] if len(agent_providers) > 1 else ["all"],
+        "agent_provider_series": _series([f"`{agent_provider}`" for agent_provider in agent_providers], "and"),
+        "agent_provider_extras": _series([f"`[{agent_provider}]`" for agent_provider in agent_providers], "or"),
+        "agent_provider_titles": _series(
+            [AGENT_PROVIDER_SDKS[agent_provider].title for agent_provider in agent_providers], "or"
+        ),
+        **_install_sources(name, agent_providers, repository),
         "references": references,
         "skill": skill,
         "repository": repository,
         "placeholder": placeholder,
         "skill_source": _skill_source(repository),
     }
+
+
+def _in_order(agent_providers: list[AgentProvider]) -> list[AgentProvider]:
+    """The chosen agent providers in `AGENT_PROVIDERS` order, which is also the order one is picked in."""
+    return [agent_provider for agent_provider in AGENT_PROVIDERS if agent_provider in agent_providers]
+
+
+def _install_sources(name: str, agent_providers: list[AgentProvider], repository: str) -> dict[str, str]:
+    """What each install instruction installs: the tool with its agent providers, or bare when it has none."""
+    if not agent_providers:
+        return {
+            "tool_source": f"git+{repository}",
+            "library_source": f'"{name} @ git+{repository}"',
+            "run_source": f"git+{repository}",
+        }
+    choice = " | ".join(["all", *agent_providers]) if len(agent_providers) > 1 else "all"
+    return {
+        "tool_source": f'"{name}[{choice}] @ git+{repository}"',
+        "library_source": f'"{name}[all] @ git+{repository}"',
+        "run_source": f'"{name}[all] @ git+{repository}"',
+    }
+
+
+def _series(items: list[str], conjunction: str) -> str:
+    """The items as prose: `a`, `a or b`, `a, b, or c`."""
+    if len(items) < 3:
+        return f" {conjunction} ".join(items)
+    return f"{', '.join(items[:-1])}, {conjunction} {items[-1]}"
 
 
 def _skill_source(repository: str) -> str:

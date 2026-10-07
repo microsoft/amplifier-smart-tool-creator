@@ -9,7 +9,7 @@ You are extending the smart tool at {{ root }}. It follows the Amplifier Smart T
 5. `lib.py`, `cli.py`, and the `SKILL.md` beside an existing capability, for the shape every capability already takes
 6. the `intelligence/` package, for the interface a model-backed capability runs through
 7. the existing tests, for how they fake the intelligence
-8. `reference/`, when it is there: the spec and the SDK, to read rather than recall
+8. `reference/`, when it is there: the spec and the SDKs, to read rather than recall
 
 A tool not scaffolded by smart-tool-creator may lay these out differently. Find the equivalents rather than assuming the paths.
 
@@ -30,7 +30,7 @@ One model-backed capability, complete:
 
 - the capability's code in `capabilities/<name>/capability.py`, or this tool's equivalent layout, with its prompt templates beside it, and a facade function in `lib.py` that imports it. The capability goes through the tool's `Intelligence` interface, never an SDK directly. Its preflight failure names exactly what to configure, and it never falls back to a deterministic answer.
 - a thin command in `cli.py` whose help text says it is model-backed. Argument parsing and I/O only; capability that exists only in the wrapper is a defect.
-- the library function takes `model: str = DEFAULT_INTELLIGENCE_MODEL` and `reasoning_effort: ReasoningEffort = "medium"` from the tool's `schemas.py`, and the command exposes both as `--model` and `--reasoning-effort`. If `schemas.py` has no `DEFAULT_INTELLIGENCE_MODEL`, add it there set to `{{ default_model }}`.
+- the library function takes `agent_provider: AgentProvider | None = None`, `model: str | None = None`, `reasoning_effort: ReasoningEffort = "medium"`, and `intelligence: Intelligence | None = None`, and picks what it runs through with `select_intelligence(intelligence, agent_provider, model, DEFAULT_INTELLIGENCE_MODELS)` from the tool's `intelligence/interface.py` and `schemas.py`. The command exposes the first three as `--agent-provider`, `--model`, and `--reasoning-effort`, and its help names each agent provider's default model. If `schemas.py` has no `DEFAULT_INTELLIGENCE_MODELS`, add it there with these defaults: {% for entry in default_models %}`{{ entry[0] }}`: `{{ entry[1] }}`{% unless forloop.last %}, {% endunless %}{% endfor %}.
 - tests that inject a fake `Intelligence`, so they pass with no model provider configured.
 - the capability's own skill at `capabilities/<name>/SKILL.md`, beside its code: what it does and when to use it, every argument and what it is for, a worked CLI invocation and a worked Python one, what it returns, and how it fails. Body only, with no title and no deterministic or model-backed line, because the library renders those. Register it on the capability's row in the capability list the skill renders (`core/skill.py` `CAPABILITIES`, or this tool's equivalent) through `skill=`.
 - `<tool> <name> --help` prints that skill and `<tool> <name> -h` the terse generated table, which the tool's `tests/test_skill.py` enumerates over every capability.
@@ -39,9 +39,9 @@ One model-backed capability, complete:
 ## Models
 
 Never write a model name from memory. The names you remember are older than the ones the account can use, and they are wrong even when they look familiar.
-The default is the tool's `DEFAULT_INTELLIGENCE_MODEL`. When you have to pick or confirm a model, list what the signed-in account can use right now and choose from that list.
+The defaults are the tool's `DEFAULT_INTELLIGENCE_MODELS`, one per agent provider. When you have to pick or confirm a model, list what the signed-in account can use right now and choose from that list. Run these from the tool's root.
 
-With the copilot-sdk intelligence layer, run this from the tool's root:
+`copilot`:
 
 ```bash
 uv run python -c "
@@ -59,7 +59,40 @@ async def main():
 asyncio.run(main())"
 ```
 
-Another intelligence layer has its own listing call in its SDK; read the SDK in `reference/` for it.
+`amplifier-agent`, where the model is `<provider>/<model>`; put the provider in place of `openai`:
+
+```bash
+uv run python -c "
+import asyncio
+from amplifier_agent import list_models
+for model in asyncio.run(list_models('openai')):
+    print(model.id, model.display_name)"
+```
+
+`codex`:
+
+```bash
+uv run python -c "
+from openai_codex import Codex
+with Codex() as codex:
+    for model in codex.models().data:
+        print(model.id, model.display_name)"
+```
+
+`claude`:
+
+```bash
+uv run python -c "
+import asyncio
+from claude_agent_sdk import ClaudeSDKClient
+async def main():
+    async with ClaudeSDKClient() as client:
+        for model in ((await client.get_server_info()) or {}).get('models', []):
+            print(model['resolvedModel'], model['displayName'])
+asyncio.run(main())"
+```
+
+A tool with another intelligence layer has its own listing call in its SDK; read the SDK in `reference/` for it.
 
 ## Constraints
 

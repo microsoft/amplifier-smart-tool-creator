@@ -1,10 +1,20 @@
-from typing import Literal, NamedTuple
+from typing import {% if agent_providers != empty %}Literal, {% endif %}NamedTuple
 
 from pydantic import BaseModel, Field
 
-DEFAULT_INTELLIGENCE_MODEL = "gpt-6-astra"
+{% if agent_providers != empty -%}
 ReasoningEffort = Literal["low", "medium", "high", "xhigh", "max"]
+AgentProvider = Literal[{% for agent_provider in agent_providers %}"{{ agent_provider }}"{% unless forloop.last %}, {% endunless %}{% endfor %}]
+# Also the order an agent provider is picked in when none is named.
+AGENT_PROVIDERS: tuple[AgentProvider, ...] = ({% for agent_provider in agent_providers %}"{{ agent_provider }}"{% if agent_providers.size == 1 %},{% endif %}{% unless forloop.last %}, {% endunless %}{% endfor %})
 
+DEFAULT_INTELLIGENCE_MODELS: dict[AgentProvider, str] = {
+{%- for agent_provider in agent_providers %}
+    "{{ agent_provider }}": "{{ default_models[agent_provider] }}",
+{%- endfor %}
+}
+
+{% endif -%}
 SEMVER_PATTERN = r"^\d+\.\d+\.\d+$"
 SLUG_PATTERN = r"^[a-z0-9]+(-[a-z0-9]+)*$"
 

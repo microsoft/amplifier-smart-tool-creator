@@ -89,9 +89,9 @@ uv run pytest
 Run the deterministic capabilities on an install without any agent provider, then restore the full environment:
 
 ```bash
-uv sync --no-extra copilot --no-extra amplifier-agent --no-extra codex --no-extra claude
-uv run smart-tool-creator manifest
-uv run pytest
+uv sync --no-dev
+uv run --no-sync smart-tool-creator manifest
+uv run --no-dev --with pytest --with pytest-asyncio pytest
 uv sync --all-extras --all-groups
 ```
 

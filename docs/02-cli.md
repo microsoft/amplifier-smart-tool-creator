@@ -28,10 +28,11 @@ smart-tool-creator manifest
 ## smart-tool-creator init
 
 ```bash
-smart-tool-creator init NAME --description TEXT [--directory PATH] [--language uv-python] [--intelligence copilot-sdk] [--skill] [--repository URL]
+smart-tool-creator init NAME --description TEXT [--directory PATH] [--language uv-python] [--agent-provider copilot|amplifier-agent|codex|claude]... [--no-agent-providers] [--skill] [--repository URL]
 ```
 
-`lib.init(name, description, ...)` with `NAME` positional and every other argument an option of the same name. 
+`lib.init(name, description, ...)` with `NAME` positional and every other argument an option of the same name, except `agent_providers`: each `--agent-provider` adds one, every one when none is given, and `--no-agent-providers` passes an empty list. 
+Giving both exits 2.
 Prints the result's `output_message`: where the tool landed, what was written and committed, the repositories cloned into `reference/`, and the next steps.
 
 ## smart-tool-creator check-conformance

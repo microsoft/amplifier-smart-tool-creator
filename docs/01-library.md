@@ -105,7 +105,7 @@ def init(
     description: str,
     directory: Path | None = None,
     language: Language = "uv-python",
-    intelligence: IntelligenceLayer = "copilot-sdk",
+    agent_providers: list[AgentProvider] | None = None,
     skill: bool = False,
     repository: str | None = None,
 ) -> Scaffold
@@ -114,27 +114,29 @@ def init(
 - `name`: the tool's slug, lowercase alphanumeric and hyphens. It becomes the manifest `name`, the CLI command, and the package name.
 - `description`: the manifest `description`, what the tool is for and when to reach for it.
 - `directory`: where the tool is created; `name` under the current directory when omitted. Must not exist, or be empty.
-- `language` and `intelligence`: the choices made at scaffold time, listed below. Either can be changed later; each is a set of files, not a commitment.
+- `language` and `agent_providers`: the choices made at scaffold time, listed below. Either can be changed later; each is a set of files, not a commitment.
 - `skill`: also ship an [Agent Skill](https://agentskills.io/specification) at `skills/<name>/SKILL.md` that teaches a coding agent to drive the tool.
 - `repository`: the `https://` URL the tool will be cloned from. It is declared in `pyproject.toml` under `[project.urls]` so `--help` carries it, and every install instruction in the `README.md`, manifest, and skill is built on it: `git+<url>` for the CLI and library, `npx skills add` for the skill, plus update and uninstall commands. When given, it also becomes the `origin` remote; nothing is pushed. When omitted, `https://github.com/<owner>/<name>` stands in everywhere, there is no remote, and the `output_message` says the instructions do not work until the placeholder is replaced and the tool is pushed.
 
 Every scaffold carries the same shape as this repository: the manifest and descriptor, a library with a thin CLI over it, a `README.md`, `CONTRIBUTING.md`, and `docs/` written for the new tool, and an `AGENTS.md` holding the principles the spec asks of a smart tool. 
-The model-backed capabilities sit behind an `Intelligence` interface so the SDK underneath is a module, not a rewrite.
+With at least one agent provider, the model-backed capabilities sit behind an `Intelligence` interface so the SDK underneath is a module, not a rewrite, and `uv sync --all-extras` installs each one into the new tool's environment, so it works from the start.
 
-A `reference/` directory holds shallow, gitignored clones of the repositories an agent developing the tool should read rather than recall: the [spec](https://github.com/microsoft/amplifier-smart-tools), the chosen SDK, and the [Agent Skills spec](https://github.com/agentskills/agentskills) when `skill` is set. 
+A `reference/` directory holds shallow, gitignored clones of the repositories an agent developing the tool should read rather than recall: the [spec](https://github.com/microsoft/amplifier-smart-tools), the SDK of each chosen agent provider, and the [Agent Skills spec](https://github.com/agentskills/agentskills) when `skill` is set. 
 `AGENTS.md` lists them and the development setup script restores any that are missing, so a fresh clone of the tool recovers them.
 
 Returns the created root, the files written under it, the repositories cloned into `reference/`, and an `output_message`: what was created and what to do next in the new tool, for the calling agent, rendered from `capabilities/init/output_message.md.liquid`. 
 The next steps start with `docs/00-vision.md` and `docs/01-library.md` because they set the stage for everything implemented afterwards; any surface that scaffolds a tool should pass the message on to its caller. 
-Raises `SmartToolCreatorError` when `name` is not a slug, `directory` is not empty, `git` or `uv` is not on `PATH`, or a reference cannot be cloned.
+Raises `SmartToolCreatorError` when `name` is not a slug, an agent provider is unknown or named twice, `directory` is not empty, `git` or `uv` is not on `PATH`, or a reference cannot be cloned.
 
 ### Languages
 
 - `uv-python`: a [uv](https://docs.astral.sh/uv/) project on Python 3.13 with `ruff`, `ty`, `pytest`, and `prek` hooks configured.
 
-### Intelligence layers
+### Agent providers
 
-- `copilot-sdk`: the [GitHub Copilot SDK](https://github.com/github/copilot-sdk), signed in through the GitHub CLI.
+The same four this tool runs through, each an optional extra of the new tool: `copilot` on the [GitHub Copilot SDK](https://github.com/github/copilot-sdk), `amplifier-agent` on [Amplifier Agent](https://github.com/microsoft/amplifier-agent), `codex` on the [OpenAI Codex SDK](https://github.com/openai/codex/tree/main/sdk/python) with full access, and `claude` on the [Claude Agent SDK](https://github.com/anthropics/claude-agent-sdk-python).
+`agent_providers` picks any of them, in any order; the scaffold keeps the order above, which is also the order a capability picks the first installed in when it names none, and `DEFAULT_INTELLIGENCE_MODELS` holds each one's default model.
+`None` ships all four. An empty list ships none: no `intelligence/` package, extras, or provider prerequisites, for a tool whose capabilities are all deterministic.
 
 ## Check conformance
 
@@ -317,4 +319,4 @@ class AddedCapability(BaseModel):
 `report` is the agent's final message: the capability's name, the files it touched, the command to try it, and its caveats. 
 `output_message` is the whole result for the calling agent, rendered from `capabilities/add_smart_capability/output_message.md.liquid`: the report, one line per check, the next steps, and the checks still failing when there are any. Nothing is committed and the working tree is not required to be clean; git stays the caller's.
 
-Raises `SmartToolCreatorError` when `directory` holds no `smart-tool.json`, `request` is empty, `uv` is not on `PATH`, the intelligence preflight fails, or the agent itself fails. An agent failure may leave partial edits in the tool's working tree, and the message says so.
+Raises `SmartToolCreatorError` when `directory` holds no `smart-tool.json` or no `Intelligence` interface at `src/<package>/intelligence/interface.py`, `request` is empty, `uv` is not on `PATH`, the intelligence preflight fails, or the agent itself fails. An agent failure may leave partial edits in the tool's working tree, and the message says so.
