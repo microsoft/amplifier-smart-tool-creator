@@ -17,7 +17,6 @@ from smart_tool_creator.schemas import (
     AddedCapability,
     AgentProvider,
     ConformanceReport,
-    IntelligenceLayer,
     Language,
     Manifest,
     ReasoningEffort,
@@ -67,7 +66,7 @@ def init(
     description: str,
     directory: Path | None = None,
     language: Language = "uv-python",
-    intelligence: IntelligenceLayer = "copilot-sdk",
+    agent_providers: list[AgentProvider] | None = None,
     skill: bool = False,
     repository: str | None = None,
 ) -> Scaffold:
@@ -75,13 +74,15 @@ def init(
 
     With `repository`, the URL it will be cloned from, the scaffold declares it in `pyproject.toml`, points every
     install instruction at it, and adds it as the `origin` remote; nothing is pushed.
+    `agent_providers` are what its model-backed capabilities can run through: every one when None, and none, for a
+    tool whose capabilities are all deterministic, when empty.
     """
     return scaffold.init(
         name,
         description,
         directory=directory,
         language=language,
-        intelligence=intelligence,
+        agent_providers=agent_providers,
         skill=skill,
         repository=repository,
     )

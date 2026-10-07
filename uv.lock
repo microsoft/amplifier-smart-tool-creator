@@ -355,7 +355,7 @@ dependencies = [
 
 [[package]]
 name = "amplifier-smart-tool-creator"
-version = "0.2.1"
+version = "0.3.0"
 source = { editable = "." }
 dependencies = [
     { name = "jsonschema" },
@@ -387,6 +387,7 @@ copilot = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "amplifier-smart-tool-creator", extra = ["all"] },
     { name = "pytest" },
     { name = "pytest-asyncio" },
     { name = "ruff" },
@@ -410,6 +411,7 @@ provides-extras = ["copilot", "amplifier-agent", "codex", "claude", "all"]
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "amplifier-smart-tool-creator", extras = ["all"] },
     { name = "pytest", specifier = ">=9.1" },
     { name = "pytest-asyncio", specifier = ">=1.4" },
     { name = "ruff", specifier = ">=0.16" },

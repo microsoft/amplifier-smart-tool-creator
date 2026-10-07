@@ -3,6 +3,7 @@
 Every capability of {{ title }} is reachable from `{{ package }}.lib`.
 All other surfaces, including the CLI, are thin wrappers over the library and add no capability of their own.
 
+{% if agent_providers != empty -%}
 ## Intelligence
 
 Model-backed capabilities run through the `Intelligence` protocol in `{{ package }}.intelligence.interface`:
@@ -19,9 +20,20 @@ class Intelligence(Protocol):
 `run` executes one agent: `AgentRequest` holds the prompt, model, optional workspace, and optional output schema; `AgentResult` holds the text, structured output, or error.
 Setting `AgentRequest.resume` to an earlier `AgentResult.session_id` continues that session instead of starting a fresh one, so the agent keeps what it learned.
 
-`default_intelligence()` returns the shipped implementation, `CopilotIntelligence`, built on the [GitHub Copilot SDK](https://github.com/github/copilot-sdk) and signed in through the GitHub CLI.
+{% if agent_providers contains "codex" %}On `codex`, a request runs with full access and no approval prompts.
+
+{% endif %}`resolve_intelligence(agent_provider)` returns a shipped implementation, one per agent provider, each installed through the extra of the same name:
+
+{% if agent_providers contains "copilot" %}- `copilot`: `CopilotIntelligence`, built on the [GitHub Copilot SDK](https://github.com/github/copilot-sdk) and signed in through the GitHub CLI.
+{% endif %}{% if agent_providers contains "amplifier-agent" %}- `amplifier-agent`: `AmplifierAgentIntelligence`, built on [Amplifier Agent](https://github.com/microsoft/amplifier-agent). The model is `<provider>/<model>`. Sessions live under the platform's per-user state directory, in `{{ name }}/amplifier-agent`.
+{% endif %}{% if agent_providers contains "codex" %}- `codex`: `CodexIntelligence`, built on the [OpenAI Codex SDK](https://github.com/openai/codex/tree/main/sdk/python) and run with the user's Codex sign-in and `~/.codex/config.toml`. A session is a Codex thread, kept where Codex keeps its threads. An output schema is enforced by the model API in its strict form, every property required and an optional one nullable; the nulls are dropped before the answer is checked against the original schema.
+{% endif %}{% if agent_providers contains "claude" %}- `claude`: `ClaudeIntelligence`, built on the [Claude Agent SDK](https://github.com/anthropics/claude-agent-sdk-python) and run with the user's Claude Code settings and the credentials Claude Code resolves: `ANTHROPIC_API_KEY`, or a cloud provider's, as [its docs](https://code.claude.com/docs/en/agent-sdk/quickstart) describe. Sessions are kept where Claude Code keeps them; a plain completion runs in the platform's per-user state directory, in `{{ name }}/claude`.
+{% endif %}
+Without an agent provider named, the first installed in that order is used; one that is not installed raises `{{ error_class }}` with the command that installs it.
+`select_intelligence(intelligence, agent_provider, model, DEFAULT_INTELLIGENCE_MODELS)` is what a capability calls: an injected `intelligence` wins, and `model` falls back to the agent provider's entry in `DEFAULT_INTELLIGENCE_MODELS`.
 Another implementation is a module satisfying the protocol and a branch in that factory.
 
+{% endif -%}
 ## Manifest
 
 The tool's `SMART_TOOL.md` as structured data: the frontmatter as fields, the Markdown below it as `Manifest.body`.
@@ -53,7 +65,7 @@ class Capability(NamedTuple):
 ```
 
 - `name` and `summary`: the command's name and its line in the tool's capability list.
-- `model_backed`: whether it runs through the `Intelligence` interface, which decides the kind shown in both skills.
+- `model_backed`: whether it {% if agent_providers != empty %}runs through the `Intelligence` interface{% else %}needs a model{% endif %}, which decides the kind shown in both skills.
 - `skill`: the capability's skill body, a Markdown file relative to `skill_directory()`, written without frontmatter, title, or kind line because the renderer supplies them.
 - `resources`: the files that body refers to, relative to `skill_directory()`, listed under `<skill_resources>` in the capability's skill. The block is omitted when there are none.
 
@@ -84,4 +96,5 @@ def repository_url() -> str | None
 
 A capability's code goes in `{{ package }}/capabilities/<name>/`, with its prompts, templates, and its own `SKILL.md` beside it, named on its row in `core/skill.py` `CAPABILITIES`, and `lib.py` gets a facade function that imports it and is the only caller of it.
 Each capability of the library gets a section here: what it does and when to reach for it, the signature `lib.py` exposes, what each argument means, and what it returns or raises.
-Model-backed capabilities say so, and take `model` and `reasoning_effort`, defaulting to `DEFAULT_INTELLIGENCE_MODEL` and `medium` from `{{ package }}.schemas`.
+{% if agent_providers != empty %}Model-backed capabilities say so, and take `agent_provider`, `model`, `reasoning_effort`, and `intelligence`. `model` defaults to the agent provider's entry in `DEFAULT_INTELLIGENCE_MODELS` and `reasoning_effort` to `medium`, both from `{{ package }}.schemas`.
+{% endif %}

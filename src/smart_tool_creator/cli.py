@@ -14,13 +14,13 @@ from typer.models import CommandFunctionType
 from smart_tool_creator import lib
 from smart_tool_creator.core.skill import DISTRIBUTION
 from smart_tool_creator.schemas import (
+    AGENT_PROVIDERS,
     DEFAULT_INTELLIGENCE_MODELS,
     DEFAULT_INTELLIGENCE_REASONING_EFFORT,
     DEFAULT_PROBE_TIMEOUT_SECONDS,
     DEFAULT_REVIEW_MODELS,
     DEFAULT_REVIEW_REASONING_EFFORT,
     AgentProvider,
-    IntelligenceLayer,
     Language,
     ReasoningEffort,
     SmartToolCreatorError,
@@ -146,9 +146,21 @@ def init(
     language: Annotated[Language, typer.Option("--language", help="The language the tool is written in.")] = (
         "uv-python"
     ),
-    intelligence: Annotated[
-        IntelligenceLayer, typer.Option("--intelligence", help="The SDK its model-backed capabilities run through.")
-    ] = "copilot-sdk",
+    # Typer cannot parse a list of Literal values, so the names are checked against AGENT_PROVIDERS here.
+    agent_provider: Annotated[
+        list[str] | None,
+        typer.Option(
+            "--agent-provider",
+            help="Repeatable; an agent provider its model-backed capabilities can run through: copilot, "
+            "amplifier-agent, codex, or claude. Every one when omitted.",
+        ),
+    ] = None,
+    no_agent_providers: Annotated[
+        bool,
+        typer.Option(
+            "--no-agent-providers", help="Ship no agent provider, for a tool whose capabilities are all deterministic."
+        ),
+    ] = False,
     skill: Annotated[
         bool, typer.Option("--skill", help="Also ship an Agent Skill that teaches an agent to drive the tool.")
     ] = False,
@@ -162,16 +174,32 @@ def init(
     ] = None,
 ) -> None:
     """Scaffold a new smart tool: a git repository holding a spec-conforming tool that passes the conformance kit. Deterministic."""
+    if no_agent_providers and agent_provider:
+        raise typer.BadParameter("Give --agent-provider or --no-agent-providers, not both.")
     scaffold = lib.init(
         name,
         description,
         directory=directory,
         language=language,
-        intelligence=intelligence,
+        agent_providers=[] if no_agent_providers else _agent_providers(agent_provider),
         skill=skill,
         repository=repository,
     )
     typer.echo(scaffold.output_message)
+
+
+def _agent_providers(names: list[str] | None) -> list[AgentProvider] | None:
+    if names is None:
+        return None
+    chosen: list[AgentProvider] = []
+    for name in names:
+        match = next((agent_provider for agent_provider in AGENT_PROVIDERS if agent_provider == name), None)
+        if match is None:
+            raise typer.BadParameter(
+                f"'{name}' is not one of {', '.join(AGENT_PROVIDERS)}.", param_hint="'--agent-provider'"
+            )
+        chosen.append(match)
+    return chosen
 
 
 @app.command()

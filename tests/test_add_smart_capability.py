@@ -13,7 +13,7 @@ from smart_tool_creator.cli import app
 from smart_tool_creator.intelligence.interface import Intelligence, resolve_intelligence
 from smart_tool_creator.intelligence.schemas import AgentRequest, AgentResult
 from smart_tool_creator.lib import add_smart_capability, init
-from smart_tool_creator.schemas import DEFAULT_INTELLIGENCE_MODEL, AddedCapability, Check, SmartToolCreatorError
+from smart_tool_creator.schemas import DEFAULT_INTELLIGENCE_MODELS, AddedCapability, Check, SmartToolCreatorError
 
 NAME = "release-notes"
 DESCRIPTION = "Summarizes changelogs into release notes"
@@ -89,8 +89,11 @@ def tool(scaffolded: Path, tmp_path: Path) -> Path:
 
 @pytest.fixture
 def descriptor_only(tmp_path: Path) -> Path:
-    """A directory that passes detection and nothing else, so the checks fail fast."""
+    """A directory that passes detection and the intelligence check and nothing else, so the checks fail fast."""
     (tmp_path / "smart-tool.json").write_text('{"smart_tool_format": 1}', encoding="utf-8")
+    interface = tmp_path / "src" / "tool" / "intelligence" / "interface.py"
+    interface.parent.mkdir(parents=True)
+    interface.touch()
     return tmp_path
 
 
@@ -104,6 +107,22 @@ def test_a_directory_without_a_descriptor_names_init_and_never_reaches_the_model
     assert str(tmp_path.resolve()) in message
     assert "smart-tool.json is not there" in message
     assert "smart-tool-creator init" in message
+    assert fake.requests == []
+    assert fake.preflights == 0
+
+
+def test_a_tool_without_an_intelligence_interface_names_how_to_get_one_and_never_reaches_the_model(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "smart-tool.json").write_text('{"smart_tool_format": 1}', encoding="utf-8")
+    fake = FakeIntelligence()
+
+    with pytest.raises(SmartToolCreatorError) as failure:
+        add_smart_capability(REQUEST, directory=tmp_path, intelligence=fake)
+
+    message = str(failure.value)
+    assert "no Intelligence interface" in message
+    assert "--agent-provider" in message
     assert fake.requests == []
     assert fake.preflights == 0
 
@@ -129,7 +148,8 @@ def test_the_prompt_carries_the_request_the_context_and_the_root(descriptor_only
     for entry in context:
         assert entry in request.prompt
     assert str(descriptor_only.resolve()) in request.prompt
-    assert DEFAULT_INTELLIGENCE_MODEL in request.prompt
+    for model in DEFAULT_INTELLIGENCE_MODELS.values():
+        assert model in request.prompt
     assert request.workspace is not None
     assert request.workspace.path == descriptor_only.resolve()
     assert request.writable is True

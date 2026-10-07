@@ -1,6 +1,6 @@
 Scaffolded {{ name }} at {{ root }}
-  {{ files | size }} files written as a {{ language }} tool with {{ intelligence }} intelligence, committed to a new git repository{% if placeholder %} with no remote{% else %} whose origin is {{ repository }}{% endif %}
-  environment synced: `uv run {{ name }} manifest` works from that directory
+  {{ files | size }} files written as a {{ language }} tool with {% if agent_providers != empty %}the {{ agent_provider_series }} agent provider{% if agent_providers.size > 1 %}s{% endif %}{% else %}no agent provider{% endif %}, committed to a new git repository{% if placeholder %} with no remote{% else %} whose origin is {{ repository }}{% endif %}
+  environment synced{% if agent_providers != empty %} with every agent provider installed{% endif %}: `uv run {{ name }} manifest` works from that directory
 {%- if skill %}
   Agent Skill at skills/{{ name }}/SKILL.md
 {%- endif %}

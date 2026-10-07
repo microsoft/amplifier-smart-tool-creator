@@ -11,19 +11,40 @@ platforms:
   - linux
   - macos
   - windows
+{%- if agent_providers != empty %}
 requires:
-  - name: gh
+{% if agent_providers contains "copilot" %}  - name: gh
     purpose: >-
-      Generates the token that signs in to GitHub Copilot. Without it, the model-backed
-      capabilities cannot authenticate.
+      Generates the token that signs in to GitHub Copilot, for the copilot agent provider.
+      Without it, the model-backed capabilities cannot authenticate through copilot.
     optional: true
     install: https://cli.github.com/
   - name: github-copilot-subscription
     purpose: >-
       A Copilot subscription on the account signed in to gh powers the model-backed
-      capabilities. Without it, only the deterministic capabilities run.
+      capabilities, for the copilot agent provider.
     optional: true
     install: https://github.com/github/copilot-cli#prerequisites
+{% endif %}{% if agent_providers contains "amplifier-agent" %}  - name: amplifier-agent-provider-credentials
+    purpose: >-
+      The credentials of the model provider the amplifier-agent agent provider calls, for
+      instance OPENAI_API_KEY for its default model. Without them, the model-backed
+      capabilities cannot run through amplifier-agent.
+    optional: true
+    install: https://github.com/microsoft/amplifier-agent/blob/v0.22.0/docs/providers.md
+{% endif %}{% if agent_providers contains "codex" %}  - name: codex-sign-in
+    purpose: >-
+      The Codex CLI signed in with ChatGPT or an API key, for the codex agent provider.
+      Without it, the model-backed capabilities cannot run through codex.
+    optional: true
+    install: https://developers.openai.com/codex/auth
+{% endif %}{% if agent_providers contains "claude" %}  - name: claude-credentials
+    purpose: >-
+      ANTHROPIC_API_KEY, or a cloud provider's credentials, for the claude agent provider.
+      Without them, the model-backed capabilities cannot run through claude.
+    optional: true
+    install: https://code.claude.com/docs/en/agent-sdk/quickstart
+{% endif %}{%- endif %}
 ---
 
 {{ description }}.
@@ -46,31 +67,67 @@ repository's `docs/01-library.md` and `docs/02-cli.md` carry the rest.
 
 ```bash
 # as a CLI
-uv tool install git+{{ repository }}
+uv tool install {{ run_source }}
 
 # as a library, from another project
-uv add "{{ name }} @ git+{{ repository }}"
+uv add {{ library_source }}
 
 # once, without installing
-uvx --from git+{{ repository }} {{ name }} --help
+uvx --from {{ run_source }} {{ name }} --help
 ```
+{%- if agent_providers.size > 1 %}
+
+`[all]` brings every agent provider the model-backed capabilities run through. Put
+{{ agent_provider_extras }} in its place for just one, or drop it for the deterministic
+capabilities only.
+{%- elsif agent_providers.size == 1 %}
+
+`[all]` brings the agent provider the model-backed capabilities run through. Drop it for the
+deterministic capabilities only.
+{%- endif %}
+
 Verify with `{{ name }} manifest`, which needs no credentials.
 
 ## Prerequisites
 
-Deterministic capabilities need only `uv`. Model-backed capabilities run through GitHub
-Copilot, signed in as the GitHub CLI's user: `gh` must be installed and `gh auth login`
-completed with an account that has a Copilot subscription. Without that, a model-backed
-capability fails immediately and names what to configure; it never falls back to a
-deterministic answer.
+{% if agent_providers.size > 1 -%}
+Deterministic capabilities need only `uv`. Model-backed capabilities run through an agent
+provider, the first installed of {{ agent_provider_series }}:
 
+{% elsif agent_providers.size == 1 -%}
+Deterministic capabilities need only `uv`. Model-backed capabilities run through the
+{{ agent_provider_series }} agent provider:
+
+{% else -%}
+Every capability is deterministic and needs only `uv`.
+{% endif -%}
+{% if agent_providers contains "copilot" %}- `copilot`: GitHub Copilot, signed in as the GitHub CLI's user. `gh` must be installed and
+  `gh auth login` completed with an account that has a Copilot subscription.
+{% endif %}{% if agent_providers contains "amplifier-agent" %}- `amplifier-agent`: [Amplifier Agent](https://github.com/microsoft/amplifier-agent), calling
+  the model provider named in the model `<provider>/<model>` with that provider's credentials,
+  for instance `OPENAI_API_KEY` for the default `openai/...` models. See its
+  [providers](https://github.com/microsoft/amplifier-agent/blob/v0.22.0/docs/providers.md).
+{% endif %}{% if agent_providers contains "codex" %}- `codex`: [OpenAI Codex](https://github.com/openai/codex), with the user's Codex configuration.
+  The Codex CLI must be signed in with ChatGPT or an API key, see
+  [authentication](https://developers.openai.com/codex/auth).
+{% endif %}{% if agent_providers contains "claude" %}- `claude`: the [Claude Agent SDK](https://github.com/anthropics/claude-agent-sdk-python), with the
+  user's Claude Code settings. Needs `ANTHROPIC_API_KEY`, or Amazon Bedrock, Claude Platform on AWS,
+  Google Cloud's Agent Platform, or Microsoft Foundry credentials, see
+  [authentication](https://code.claude.com/docs/en/agent-sdk/quickstart).
+{% endif %}{% if agent_providers != empty %}
+Without one, a model-backed capability fails immediately and names what to configure; it
+never falls back to a deterministic answer.
+{% endif %}
 Runs on Linux, macOS, and Windows.
 
 ## Straight and smart paths
 
+{% if agent_providers != empty -%}
 Deterministic capabilities run with no provider configured. Model-backed capabilities go
-through GitHub Copilot, signed in as the GitHub CLI's user, and say so in their help text.
-
+through {{ agent_provider_titles }}, and say so in their help text.
+{% else -%}
+Every capability is deterministic and runs with no model provider configured.
+{% endif %}
 ## Output and failure contract
 
 Results go to stdout, diagnostics to stderr. A failure prints a message naming what went

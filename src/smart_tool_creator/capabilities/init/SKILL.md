@@ -1,7 +1,7 @@
 `init` creates a git repository (no remote) holding a tool that already passes the
 conformance kit: manifest, descriptor, library, thin CLI, docs, tests, an `AGENTS.md`
 carrying the spec's principles, and a gitignored `reference/` with shallow clones of the
-spec and the SDK to read while developing. The environment is synced and the first commit is
+spec and the agent provider SDKs to read while developing. The environment is synced and the first commit is
 made.
 
 ```bash
@@ -30,8 +30,13 @@ scaffold.root, scaffold.files, scaffold.references, scaffold.output_message
   It must not exist, or must be empty.
 - `--language`: the language the tool is written in. `uv-python`, the default, is the only
   one.
-- `--intelligence`: the SDK its model-backed capabilities run through. `copilot-sdk`, the
-  default, is the only one.
+- `--agent-provider`: repeatable; an agent provider its model-backed capabilities can run
+  through: `copilot`, `amplifier-agent`, `codex`, or `claude`. Each is an optional extra of
+  the new tool, installed in its environment, with its SDK cloned into `reference/`. Every one
+  when omitted. Library: `agent_providers`, a list, every one when `None`.
+- `--no-agent-providers`: ship none, for a tool whose capabilities are all deterministic: no
+  `intelligence/` package, extras, or provider prerequisites. Library: `agent_providers=[]`.
+  Not together with `--agent-provider`.
 - `--skill`: also ship an Agent Skill at `skills/<name>/SKILL.md` that teaches an agent to
   drive the tool. Off by default.
 - `--repository URL`: the `https://` URL the tool will be cloned from. It is declared in
@@ -59,7 +64,8 @@ as is creating the remote and replacing the placeholder when `--repository` was 
 Deterministic, but it needs the network for `uv sync` and the reference clones.
 
 A failure prints its message to stderr and exits 1: the name is not a slug, the description
-is empty, `--repository` is not an `https://` URL, the target directory is a file or is not
-empty, `git` or `uv` is not on `PATH`, git has no `user.name` or `user.email` for the first
-commit, or a reference cannot be cloned. A bad invocation exits 2. Everything knowable is
+is empty, an agent provider is unknown or named twice, `--repository` is not an `https://`
+URL, the target directory is a file or is not empty, `git` or `uv` is not on `PATH`, git has
+no `user.name` or `user.email` for the first commit, or a reference cannot be cloned. A bad
+invocation, including `--agent-provider` with `--no-agent-providers`, exits 2. Everything knowable is
 checked before a file is written, so a failure caught there leaves no half-built tool.

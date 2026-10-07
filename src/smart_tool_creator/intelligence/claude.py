@@ -10,11 +10,7 @@ from claude_agent_sdk import ClaudeAgentOptions, ClaudeSDKClient, ResultMessage
 
 from smart_tool_creator.intelligence.interface import state_directory
 from smart_tool_creator.intelligence.schemas import AgentRequest, AgentResult
-from smart_tool_creator.intelligence.submission import (
-    MAX_INVALID_SUBMISSIONS,
-    reanswer_prompt,
-    submission_problem,
-)
+from smart_tool_creator.intelligence.submission import MAX_INVALID_SUBMISSIONS, reanswer_prompt, submission_problem
 from smart_tool_creator.schemas import SmartToolCreatorError
 
 AUTHENTICATION_DOCUMENTATION = "https://code.claude.com/docs/en/agent-sdk/quickstart"

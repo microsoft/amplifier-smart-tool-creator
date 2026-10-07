@@ -14,7 +14,6 @@ from smart_tool_creator.capabilities.check_conformance.capability import (
 from smart_tool_creator.intelligence.interface import Intelligence, select_intelligence
 from smart_tool_creator.intelligence.schemas import AgentRequest, AgentResult, HostWorkspace
 from smart_tool_creator.schemas import (
-    DEFAULT_INTELLIGENCE_MODEL,
     DEFAULT_INTELLIGENCE_MODELS,
     DEFAULT_INTELLIGENCE_REASONING_EFFORT,
     AddedCapability,
@@ -59,7 +58,11 @@ def add_smart_capability(
     _preflight(request, root, intelligence)
 
     prompt = _render(
-        PROMPT_PATH, root=str(root), request=request, context=entries, default_model=DEFAULT_INTELLIGENCE_MODEL
+        PROMPT_PATH,
+        root=str(root),
+        request=request,
+        context=entries,
+        default_models=list(DEFAULT_INTELLIGENCE_MODELS.items()),
     )
     result = _agent(intelligence, prompt, root, model, reasoning_effort)
 
@@ -94,6 +97,13 @@ def _preflight(request: str, root: Path, intelligence: Intelligence) -> None:
             f"Run 'smart-tool-creator init <name> --description \"...\" --directory {root}' first, "
             "then call add-smart-capability again."
         )
+    if not _intelligence_interfaces(root):
+        raise SmartToolCreatorError(
+            f"The tool at {root} has no Intelligence interface for a model-backed capability to run through: "
+            "no intelligence/interface.py under src/<package>/. Scaffold the tool with at least one agent provider "
+            "('smart-tool-creator init <name> --description \"...\" --agent-provider copilot'), or add an "
+            "intelligence package like the one that command writes, then call add-smart-capability again."
+        )
     if not request:
         raise SmartToolCreatorError(
             "The new capability needs a request. Say what it does, who it is for, and what it takes in and gives back."
@@ -101,6 +111,11 @@ def _preflight(request: str, root: Path, intelligence: Intelligence) -> None:
     if shutil.which("uv") is None:
         raise SmartToolCreatorError("'uv' is not on PATH. Install it from https://docs.astral.sh/uv/ and try again.")
     intelligence.preflight()
+
+
+def _intelligence_interfaces(root: Path) -> list[Path]:
+    """The tool's Intelligence interface, in the src layout a scaffold uses or the flat one."""
+    return [*root.glob("src/*/intelligence/interface.py"), *root.glob("*/intelligence/interface.py")]
 
 
 def _render(template: Path, **variables: object) -> str:

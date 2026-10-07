@@ -11,6 +11,7 @@ from typer.core import TyperCommand, TyperOption
 from typer.models import CommandFunctionType
 
 from {{ package }} import lib
+from {{ package }}.core.skill import DISTRIBUTION
 from {{ package }}.schemas import {{ error_class }}
 
 
@@ -79,8 +80,18 @@ def _print_skill(value: bool) -> None:
         raise typer.Exit()
 
 
+def _print_version(value: bool) -> None:
+    if value:
+        typer.echo(f"{DISTRIBUTION} {lib.version()}")
+        raise typer.Exit()
+
+
 @app.callback()
 def cli(
+    version: Annotated[
+        bool,
+        typer.Option("--version", "-V", is_eager=True, callback=_print_version, help="Print the version and exit."),
+    ] = False,
     help: Annotated[
         bool,
         typer.Option(
