@@ -35,24 +35,28 @@ INTELLIGENCE_DEPENDENCIES = ["jsonschema>=4.26.0,<5.0.0"]
 AGENT_PROVIDER_SDKS: dict[AgentProvider, AgentProviderSdk] = {
     "copilot": AgentProviderSdk(
         title="GitHub Copilot",
+        link="[GitHub Copilot SDK](https://github.com/github/copilot-sdk)",
         module="copilot",
         requirement="github-copilot-sdk>=1.0.13,<2.0.0",
         repository="https://github.com/github/copilot-sdk",
     ),
     "amplifier-agent": AgentProviderSdk(
         title="Amplifier Agent",
+        link="[Amplifier Agent](https://github.com/microsoft/amplifier-agent)",
         module="amplifier_agent",
         requirement="amplifier-agent @ git+https://github.com/microsoft/amplifier-agent@v0.22.0#subdirectory=packages/python",
         repository="https://github.com/microsoft/amplifier-agent",
     ),
     "codex": AgentProviderSdk(
         title="Codex",
+        link="the [OpenAI Codex SDK](https://github.com/openai/codex/tree/main/sdk/python)",
         module="openai_codex",
         requirement="openai-codex>=0.159.2,<1.0.0",
         repository="https://github.com/openai/codex",
     ),
     "claude": AgentProviderSdk(
         title="Claude",
+        link="the [Claude Agent SDK](https://github.com/anthropics/claude-agent-sdk-python)",
         module="claude_agent_sdk",
         requirement="claude-agent-sdk>=0.2.163,<0.3.0",
         repository="https://github.com/anthropics/claude-agent-sdk-python",
@@ -244,6 +248,9 @@ def _variables(
         "agent_provider_extras": _series([f"`[{agent_provider}]`" for agent_provider in agent_providers], "or"),
         "agent_provider_titles": _series(
             [AGENT_PROVIDER_SDKS[agent_provider].title for agent_provider in agent_providers], "or"
+        ),
+        "agent_provider_links": _series(
+            [AGENT_PROVIDER_SDKS[agent_provider].link for agent_provider in agent_providers], "and"
         ),
         **_install_sources(name, agent_providers, repository),
         "references": references,
