@@ -1,7 +1,7 @@
 ---
 smart_tool_format: 1
 name: smart-tool-creator
-version: 0.3.1
+version: 0.3.2
 description: >
   Creates, validates, and evaluates smart tools that follow the Amplifier Smart Tool
   Spec. Use when you want to package domain expertise as a smart tool, check that an
@@ -120,7 +120,8 @@ uv tool install "amplifier-smart-tool-creator[claude] @ git+https://github.com/m
 uv tool install git+https://github.com/microsoft/amplifier-smart-tool-creator
 ```
 
-Verify with `smart-tool-creator manifest`, which needs no credentials.
+Verify with `smart-tool-creator manifest`, which needs no credentials. To upgrade, run
+`uv tool upgrade amplifier-smart-tool-creator`.
 
 ## Prerequisites
 

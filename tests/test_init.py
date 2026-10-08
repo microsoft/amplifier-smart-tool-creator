@@ -196,6 +196,7 @@ def test_init_with_a_repository_points_every_install_at_it(tmp_path: Path) -> No
     invoked = run(["uv", "run", NAME, "--help"], root)
     assert invoked.returncode == 0, invoked.stderr
     assert f"Repository: {repository}" in invoked.stdout.splitlines()[2]
+    assert invoked.stdout.splitlines()[3] == "Version: 0.1.0"
 
     capability_skill = run(["uv", "run", NAME, "manifest", "--help"], root)
     terse = run(["uv", "run", NAME, "manifest", "-h"], root)

@@ -61,7 +61,16 @@ def test_repository_line_names_the_url_the_package_declares() -> None:
     assert repository_url() == declared
     assert header[1].startswith("Skill directory: ")
     assert header[2] == f"Repository: {declared}"
-    assert header[3] == "Relative paths in this skill are relative to the skill directory."
+    assert header[3] == f"Version: {version()}"
+    assert header[4] == "Relative paths in this skill are relative to the skill directory."
+
+
+def test_version_line_names_the_manifest_version_in_every_skill() -> None:
+    line = f"Version: {load_manifest().version}"
+
+    assert skill().splitlines()[3] == line
+    for capability in CAPABILITIES:
+        assert skill(capability.name).splitlines()[3] == line
 
 
 def test_skill_resources_resolve_under_the_skill_directory() -> None:
