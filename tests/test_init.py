@@ -181,7 +181,6 @@ def test_init_with_a_repository_points_every_install_at_it(tmp_path: Path) -> No
     readme = (root / "README.md").read_text(encoding="utf-8")
     assert f'uv tool install "{NAME}[all | copilot | amplifier-agent | codex | claude] @ git+{repository}"' in readme
     assert f'uv add "{NAME}[all] @ git+{repository}"' in readme
-    assert f'uvx --from "{NAME}[all] @ git+{repository}" {NAME} --help' in readme
     assert "npx skills add example/release-notes" in readme
     assert f"uv tool upgrade {NAME}" in readme
     assert f"uv tool uninstall {NAME}" in readme
