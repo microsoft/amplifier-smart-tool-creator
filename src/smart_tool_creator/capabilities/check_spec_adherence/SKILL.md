@@ -96,7 +96,7 @@ smart-paths                           the model-backed capabilities, their help 
 
 self-description                      SMART_TOOL.md, each capability's skill, skills/<name>/SKILL.md, the rendered --help
   tool-skill-content                  when to reach for the tool, install, invocations, sharp edges; under 500 lines
-  capability-skills-complete          every capability's skill has its arguments, an invocation, the result, the failures
+  capability-skills-complete          every capability's skill has its arguments, an invocation, and the result
   agent-skill-is-thin                 the shipped Agent Skill carries the name, description, install, and "run --help"
   manifest-describes-the-tool         description and use_cases match what the capabilities do
 

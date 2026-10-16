@@ -17,7 +17,7 @@ Next:
   if you already know the surface, sketch it in docs/01-library.md: each capability, its signature, and what it returns.
     Both docs are for people; keep them concise and readable.
   add the first capability under src/{{ package }}/capabilities/<name>/, then expose it from lib.py and cli.py
-  write its skill at src/{{ package }}/capabilities/<name>/SKILL.md and name it on its row in core/skill.py CAPABILITIES,
+  write its skill at src/{{ package }}/capabilities/<name>/skill_<name>.md and name it on its row in core/skill.py CAPABILITIES,
     so `{{ name }} <name> --help` prints it and `{{ name }} <name> -h` stays the terse table
   document it in docs/01-library.md and docs/02-cli.md
   run `prek run --all-files`, `uv run pytest`, and the conformance kit as CONTRIBUTING.md describes

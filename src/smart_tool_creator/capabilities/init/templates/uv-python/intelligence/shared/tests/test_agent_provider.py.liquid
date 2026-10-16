@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from {{ package }} import lib
+from {{ package }}.core.skill import repository_url
 from {{ package }}.intelligence import interface
 from {{ package }}.intelligence.interface import resolve_agent_provider, select_intelligence
 from {{ package }}.intelligence.schemas import AgentRequest, AgentResult
@@ -66,7 +66,7 @@ def test_a_missing_agent_provider_names_the_install_command(
         resolve_agent_provider(named)
 
     message = str(failure.value)
-    assert f'uv tool install "{{ name }}[{extras[0]}] @ git+{lib.repository_url()}"' in message
+    assert f'uv tool install "{{ name }}[{extras[0]}] @ git+{repository_url()}"' in message
     for extra in extras:
         assert f"[{extra}]" in message
 
