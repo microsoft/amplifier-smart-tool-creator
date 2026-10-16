@@ -41,7 +41,7 @@ def load_manifest() -> Manifest
 ## Skill
 
 What an agent reads once it has decided to drive the tool: the manifest body and the capability list, wrapped so the reader knows where the tool's files are. 
-Naming a capability returns that capability's own skill instead: the same wrapper, a heading carrying the capability's name, whether it is deterministic or model-backed, and the Markdown beside its code, which covers its arguments, a worked invocation, its result, and its failures. 
+Naming a capability returns that capability's own skill instead: the same wrapper, a heading carrying the capability's name, whether it is deterministic or model-backed, and the Markdown beside its code, which covers its arguments, a worked invocation, and its result. 
 The CLI's `--help` prints exactly this, the tool's at the root and the capability's on a command. 
 Raises `SmartToolCreatorError` when the name is not a capability, naming the ones that are.
 
@@ -235,7 +235,7 @@ smart-paths                         the model-backed capabilities, their help te
 
 self-description                    SMART_TOOL.md, each capability's skill, skills/<name>/SKILL.md, the rendered --help
   tool-skill-content                when to reach for the tool and when not, install, worked invocations, sharp edges, where to read more; under 500 lines
-  capability-skills-complete        every capability's skill has its arguments, a worked invocation, the result, and the failures
+  capability-skills-complete        every capability's skill has its arguments, a worked invocation, and the result
   agent-skill-is-thin               the shipped Agent Skill, when there is one, does not duplicate what --help renders; frontmatter and trigger keywords are expected
   manifest-describes-the-tool       description and use_cases match what the capabilities do
 

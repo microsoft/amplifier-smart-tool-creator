@@ -32,7 +32,7 @@ SHIPPED_ALONGSIDE = [
     "docs/02-cli.md",
     "setup-for-dev.py",
     "src/release_notes/capabilities/__init__.py",
-    "src/release_notes/core/manifest.md",
+    "src/release_notes/core/skill_manifest.md",
     "src/release_notes/core/skill.py",
     "skills/release-notes/SKILL.md",
     "tests/test_manifest.py",

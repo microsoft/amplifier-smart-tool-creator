@@ -11,9 +11,9 @@ DISTRIBUTION = "{{ name }}"
 
 # One table drives the skill's capability list, so it cannot drift from what the CLI exposes.
 # Every capability added to the library gets a row here, naming the capability's own skill:
-# the Markdown beside its code, at `capabilities/<name>/SKILL.md`.
+# the Markdown beside its code, at `capabilities/<name>/skill_<capability>.md`.
 CAPABILITIES = (
-    Capability("manifest", "Print the tool's manifest as JSON.", model_backed=False, skill="core/manifest.md"),
+    Capability("manifest", "Print the tool's manifest as JSON.", model_backed=False, skill="core/skill_manifest.md"),
 )
 
 # Paths relative to the skill directory. Both ship inside the package, so both resolve after installation.
@@ -51,11 +51,6 @@ def capability(name: str) -> Capability:
 def skill_resources() -> list[str]:
     """The files the skill lists, as paths relative to the skill directory."""
     return _installed(SKILL_RESOURCES)
-
-
-def capability_skill_resources(name: str) -> list[str]:
-    """The files a capability's skill lists, as paths relative to the skill directory."""
-    return _installed(capability(name).resources)
 
 
 def skill(capability: str | None = None) -> str:

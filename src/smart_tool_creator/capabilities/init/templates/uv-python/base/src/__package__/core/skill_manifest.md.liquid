@@ -13,8 +13,3 @@ from {{ package }}.lib import load_manifest
 manifest = load_manifest()
 manifest.name, manifest.version, manifest.use_cases, manifest.body
 ```
-
-## Failures
-
-Exits 0 with the JSON. A failure the tool can name prints its message to stderr and exits 1;
-a bad invocation exits 2. An empty result is never success.

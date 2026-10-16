@@ -19,8 +19,6 @@ the CLI assembles can drift from the library's own account of itself.
 - `<tool> <capability> --help` does the same with that capability's skill from the library.
 - `-h` stays the terse generated summary at both scopes, which is the framework's own output
   and not a second skill.
-- The library also exposes the pieces the skill is built from, so a library caller can reach
-  them without the CLI.
 
 ## Deviates when
 

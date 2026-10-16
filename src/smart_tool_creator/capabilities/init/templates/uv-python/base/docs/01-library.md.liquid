@@ -45,7 +45,7 @@ def load_manifest() -> Manifest
 ## Skill
 
 What an agent reads once it has decided to drive the tool: the manifest body and the capability list, wrapped so the reader knows where the tool's files are.
-Naming a capability returns that capability's own skill instead: the same wrapper, a heading carrying the capability's name, whether it is deterministic or model-backed, and the Markdown beside its code, which covers its arguments, a worked invocation, its result, and its failures.
+Naming a capability returns that capability's own skill instead: the same wrapper, a heading carrying the capability's name, whether it is deterministic or model-backed, and the Markdown beside its code, which covers its arguments, a worked invocation, and its result.
 The CLI's `--help` prints exactly this, the tool's at the root and the capability's on a command.
 Raises `{{ error_class }}` when the name is not a capability, naming the ones that are.
 
@@ -66,35 +66,20 @@ class Capability(NamedTuple):
 
 - `name` and `summary`: the command's name and its line in the tool's capability list.
 - `model_backed`: whether it {% if agent_providers != empty %}runs through the `Intelligence` interface{% else %}needs a model{% endif %}, which decides the kind shown in both skills.
-- `skill`: the capability's skill body, a Markdown file relative to `skill_directory()`, written without frontmatter, title, or kind line because the renderer supplies them.
-- `resources`: the files that body refers to, relative to `skill_directory()`, listed under `<skill_resources>` in the capability's skill. The block is omitted when there are none.
+- `skill`: the capability's skill body, a Markdown file relative to the installed package root, written without frontmatter, title, or kind line because the renderer supplies them.
+- `resources`: the files that body refers to, relative to the installed package root, listed under `<skill_resources>` in the capability's skill. The block is omitted when there are none.
 
-The installed package root, resolved at runtime, where the files the skill names can be read.
+## Version
 
-```python
-def skill_directory() -> Path
-```
-
-The files the skill lists under `<skill_resources>`, as paths relative to `skill_directory()`. Every one ships inside the package, so each resolves after installation.
-The second does the same for one capability's skill, and raises `{{ error_class }}` when the name is not a capability.
+The installed package's version, from its metadata. The CLI's `--version` prints it.
 
 ```python
-def skill_resources() -> list[str]
-
-
-def capability_skill_resources(capability: str) -> list[str]
-```
-
-The tool's canonical source, read from the package metadata's `[project.urls]` `Repository` entry, or `None` when the package declares none.
-The skill carries it so a caller that can run the tool but not read its files still reaches the documentation.
-
-```python
-def repository_url() -> str | None
+def version() -> str
 ```
 
 ## Adding a capability
 
-A capability's code goes in `{{ package }}/capabilities/<name>/`, with its prompts, templates, and its own `SKILL.md` beside it, named on its row in `core/skill.py` `CAPABILITIES`, and `lib.py` gets a facade function that imports it and is the only caller of it.
+A capability's code goes in `{{ package }}/capabilities/<name>/`, with its prompts, templates, and its own `skill_<capability>.md` beside it, named on its row in `core/skill.py` `CAPABILITIES`, and `lib.py` gets a facade function that imports it and is the only caller of it.
 Each capability of the library gets a section here: what it does and when to reach for it, the signature `lib.py` exposes, what each argument means, and what it returns or raises.
 {% if agent_providers != empty %}Model-backed capabilities say so, and take `agent_provider`, `model`, `reasoning_effort`, and `intelligence`. `model` defaults to the agent provider's entry in `DEFAULT_INTELLIGENCE_MODELS` and `reasoning_effort` to `medium`, both from `{{ package }}.schemas`.
 {% endif %}

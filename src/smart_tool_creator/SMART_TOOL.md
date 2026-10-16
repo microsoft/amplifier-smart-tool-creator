@@ -1,7 +1,7 @@
 ---
 smart_tool_format: 1
 name: smart-tool-creator
-version: 0.3.2
+version: 0.3.3
 description: >
   Creates, validates, and evaluates smart tools that follow the Amplifier Smart Tool
   Spec. Use when you want to package domain expertise as a smart tool, check that an
@@ -88,8 +88,8 @@ Not for:
 ## Before writing code
 
 Every capability has its own skill. Read `smart-tool-creator <command> --help` before calling
-it: it carries the arguments, a worked invocation, the result, and the failures. Do not fill
-gaps from memory. The library source beside this file, `lib.py`, carries the signatures. The
+it: it carries the arguments, a worked invocation, and the result. Do not fill gaps from
+memory. The library source beside this file, `lib.py`, carries the signatures. The
 repository's `docs/01-library.md` and `docs/02-cli.md` carry the rest.
 
 ## Install

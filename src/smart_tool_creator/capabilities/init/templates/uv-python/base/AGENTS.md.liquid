@@ -12,7 +12,7 @@ This is a Smart Tool that must conform to Microsoft's [Amplifier Smart Tool Spec
 {%- else %}
 - Every capability is deterministic and runs with no model provider configured. A model-backed capability needs an intelligence layer, an `Intelligence` interface it runs through instead of an SDK directly; this tool has none to build on.
 {%- endif %}
-- A capability is its code, a row in `CAPABILITIES`, and a `SKILL.md` beside that code carrying its arguments, a worked invocation, its result, and its failures. `<command> --help` renders that skill, `<command> -h` stays the terse generated summary, and the tool's own skill stays a router pointing at both.
+- A capability is its code, a row in `CAPABILITIES`, and a `skill_<capability>.md` beside that code carrying its arguments, a worked invocation, and its result. `<command> --help` renders that skill, `<command> -h` stays the terse generated summary, and the tool's own skill stays a router pointing at both.
 - Failures name what went wrong and how to fix it. The caller is usually an agent.
 - The `Repository` URL under `[project.urls]` in `pyproject.toml` is the tool's canonical source: `--help` carries it, so an agent that can run the tool but not read its files still finds the docs, and every install instruction in `README.md`, `SMART_TOOL.md`, and the skill is built on it. If it is still the `<owner>` placeholder, replace it everywhere it appears once the remote exists.
 - Never modify this file unless explictly told.
