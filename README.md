@@ -1,5 +1,19 @@
 # Smart Tool Creator
 
+## Quickstart
+
+Ask your agent:
+
+> Install https://github.com/microsoft/amplifier-smart-tool-creator and its agent skill.
+
+Then describe the tool you want to build:
+
+> Create a research notebook smart tool. Give it a topic, URLs, papers, or datasets to gather and organize in a searchable local collection. Track sources and changes over time, and let me ask questions across everything I have collected, with citations back to the original material.
+
+For manual setup, see [Installation](#installation).
+
+## About
+
 [Explore the website](https://microsoft.github.io/amplifier-smart-tool-creator/)
 
 Smart Tool Creator builds [smart tools](https://github.com/microsoft/amplifier-smart-tools). It scaffolds the structure the spec requires, checks a tool against the spec's conformance kit, reviews it against the parts of the spec the kit cannot decide, and adds model-backed capabilities to it.
@@ -17,7 +31,7 @@ Prerequisites:
   - `claude` agent provider: `ANTHROPIC_API_KEY`, or any of its other supported modes of [authentication](https://code.claude.com/docs/en/agent-sdk/quickstart).
 - (Optional) Install the Smart Tools skill so your agent knows about Smart Tools: `npx skills add microsoft/amplifier-smart-tools`
 
-To get started:
+To install manually:
 
 ```bash
 # Install the Agent Skill so your agent knows about it.
