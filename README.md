@@ -5,6 +5,8 @@
   <a href="https://microsoft.github.io/amplifier-smart-tools/">Smart Tools</a>
 </p>
 
+<p align="center">Turn what you know into a tool any agent can use. It builds the tool, checks it against the spec, and makes it ready to share.</p>
+
 ## Quickstart
 
 Ask your agent:
