@@ -1,4 +1,9 @@
-# Smart Tool Creator
+<h1 align="center">Smart Tool Creator</h1>
+
+<p align="center">
+  <a href="https://microsoft.github.io/amplifier-smart-tool-creator/">Website</a> |
+  <a href="https://microsoft.github.io/amplifier-smart-tools/">Smart Tools</a>
+</p>
 
 ## Quickstart
 
@@ -13,8 +18,6 @@ Then describe the tool you want to build:
 For manual setup, see [Installation](#installation).
 
 ## About
-
-[Explore the website](https://microsoft.github.io/amplifier-smart-tool-creator/)
 
 Smart Tool Creator builds [smart tools](https://github.com/microsoft/amplifier-smart-tools). It scaffolds the structure the spec requires, checks a tool against the spec's conformance kit, reviews it against the parts of the spec the kit cannot decide, and adds model-backed capabilities to it.
 
