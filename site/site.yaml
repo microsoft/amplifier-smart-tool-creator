@@ -1,0 +1,60 @@
+# The content of the Smart Tool Creator website. The version and platforms come from the manifest.
+kind: tool
+key: smart-tool-creator
+name: Smart Tool Creator
+# Browser tab and search engines.
+title: Smart Tool Creator | Amplifier Smart Tools
+description: >-
+  Smart Tool Creator builds Amplifier Smart Tools. It scaffolds the structure the specification requires,
+  checks a tool against the conformance kit, reviews it against the specification, and adds model-backed capabilities.
+
+# The large headline. Each entry is one line.
+promise:
+  - Turn what you know
+  - into a shareable tool.
+# The tool's color, from its icon. It tints the parts that are the tool's own.
+tint: '#bfe8d5'
+
+# The list at the right of the headline. Each entry has a copy button.
+requests:
+  title: Then describe your tool
+  items:
+    - Create a research notebook smart tool. It gathers the papers and data for a topic in a searchable local collection, and answers questions across them with citations.
+    - Check this smart tool against the spec and tell me what to fix.
+    - Add a capability to my tool. Given an incident id, it drafts a blameless postmortem from transcripts and the alert timeline.
+
+# The parts of the page under the headline, in order. Each has a kind.
+sections:
+  # The blocks. The entry with own is the filled block with the plus.
+  - kind: blocks
+    title: A complete tool, plus what you know.
+    text: The Creator writes the parts that each smart tool has. You bring the expertise.
+    items:
+      - title: Library
+        text: Each capability lives here, so any surface can reuse it
+      - title: Your expertise
+        text: The capability you describe, built in and evaluated.
+        own: true
+      - title: CLI
+        text: A thin layer over the library, with help that an agent can read
+      - title: Manifest and skill
+        text: Defines the tool and how to call it
+
+  # Cards. icon is one of: box, plug, window, check, chat, terminal, loop, spark, library, search.
+  - kind: cards
+    title: Checked before you share it.
+    items:
+      - title: The conformance kit
+        text: It runs each rule of the specification and reports the result.
+        icon: check
+      - title: A review
+        text: An agent reports back suggestions to make your tool better.
+        icon: search
+      - title: The tool's own checks
+        text: It runs the tool's tests, prek, and the conformance kit, and fixes what fails.
+        icon: loop
+
+# Other tools at the end of the page, by their key in the theme's family.json.
+related:
+  - reality-check
+  - digital-twin-universe
