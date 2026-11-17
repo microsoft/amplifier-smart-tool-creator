@@ -48,7 +48,7 @@ Exits 1 when the verdict is `FAIL`.
 ## smart-tool-creator check-spec-adherence
 
 ```bash
-smart-tool-creator check-spec-adherence [--directory PATH] [--check ID]... [--agent-provider copilot|amplifier-agent|codex|claude] [--model MODEL] [--reasoning-effort high]
+smart-tool-creator check-spec-adherence [--directory PATH] [--check ID]... [--agent-provider copilot|amplifier-agent|codex|claude] [--model MODEL] [--reasoning-effort medium]
 ```
 
 `lib.check_spec_adherence(directory, checks, ...)` with `--check` repeated once per id. 
@@ -59,7 +59,7 @@ Exits 1 in either case: the kit failed, or any finding deviates.
 ## smart-tool-creator add-smart-capability
 
 ```bash
-smart-tool-creator add-smart-capability REQUEST [--directory PATH] [--context TEXT]... [--agent-provider copilot|amplifier-agent|codex|claude] [--model MODEL] [--reasoning-effort low]
+smart-tool-creator add-smart-capability REQUEST [--directory PATH] [--context TEXT]... [--agent-provider copilot|amplifier-agent|codex|claude] [--model MODEL] [--reasoning-effort medium]
 ```
 
 `lib.add_smart_capability(request, ...)` with `REQUEST` positional and `--context` repeated once per entry. 

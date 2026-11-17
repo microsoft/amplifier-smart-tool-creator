@@ -38,8 +38,8 @@ READ_ONLY_TOOLS = ["read_file", "glob", "grep", "bash"]
 WRITE_TOOLS = ["write_file", "edit_file"]
 PROVIDERS_DOCUMENTATION = "https://github.com/microsoft/amplifier-agent/blob/main/docs/providers.md"
 JSON_SCHEMA_DIALECT = "https://json-schema.org/draft/2020-12/schema"
-# The runtime rejects arguments that break a tool's declared schema before the handler runs, and ends the turn.
-# Declaring any object and validating in the handler turns a bad submission into a failure the model can retry.
+# Declaring any object leaves the submission to the handler, which judges it with the same validator as the
+# end of the turn, so a call the model can retry fails with the message the resubmit prompt would give.
 PERMISSIVE_SCHEMA: dict[str, Any] = {"$schema": JSON_SCHEMA_DIALECT, "type": "object"}
 SUBMIT_DESCRIPTION = """Submit your final answer. Call it exactly once, when you are done.
 The arguments must be one JSON object matching this JSON schema:
@@ -108,6 +108,8 @@ class AmplifierAgentIntelligence:
             working_directory=directory,
             sessions_directory=state_directory("amplifier-agent"),
             approvals="allow",
+            # The tools above are the whole set; smart tools, on by default, would add their skill and prompt section.
+            smart_tools=False,
         )
         deadline = time.monotonic() + request.timeout_seconds
         timed_out = f"The agent did not finish within {request.timeout_seconds} seconds."
@@ -194,6 +196,12 @@ async def _session(agent: Agent, resume: str | None) -> Session:
 
 async def _probe(provider: str, model: str) -> None:
     agent = await create_agent(
-        AgentOptions(provider=provider, model=model, tools=[], sessions_directory=state_directory("amplifier-agent"))
+        AgentOptions(
+            provider=provider,
+            model=model,
+            tools=[],
+            sessions_directory=state_directory("amplifier-agent"),
+            smart_tools=False,
+        )
     )
     await agent.close()

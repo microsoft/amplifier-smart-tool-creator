@@ -83,7 +83,7 @@ smart-tool-creator check-conformance --directory ./incident-postmortem
 smart-tool-creator check-spec-adherence --directory ./incident-postmortem
 
 # The same review through Amplifier Agent on another model
-smart-tool-creator check-spec-adherence --directory ./incident-postmortem --agent-provider amplifier-agent --model anthropic/claude-opus-5
+smart-tool-creator check-spec-adherence --directory ./incident-postmortem --agent-provider amplifier-agent --model anthropic/claude-opus-5-5
 
 # Add one model-backed capability to an existing smart tool, verified against that tool's own checks (model-backed)
 smart-tool-creator add-smart-capability "Given an incident id, fetch its chat transcript and alert timeline from the incident platform and draft a blameless postmortem: summary, impact, contributing factors, and action items with owners" --directory ./incident-postmortem

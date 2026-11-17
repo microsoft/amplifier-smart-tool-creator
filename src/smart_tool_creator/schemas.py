@@ -8,14 +8,14 @@ AgentProvider = Literal["copilot", "amplifier-agent", "codex", "claude"]
 # Also the order an agent provider is picked in when none is named.
 AGENT_PROVIDERS: tuple[AgentProvider, ...] = ("copilot", "amplifier-agent", "codex", "claude")
 
-DEFAULT_INTELLIGENCE_MODEL = "gpt-6-astra"
+DEFAULT_INTELLIGENCE_MODEL = "gpt-6.1-sol"
 DEFAULT_INTELLIGENCE_MODELS: dict[AgentProvider, str] = {
     "copilot": DEFAULT_INTELLIGENCE_MODEL,
-    "amplifier-agent": "openai/gpt-6-astra",
+    "amplifier-agent": "openai/gpt-6.1-sol",
     "codex": "gpt-6.1-sol",
     "claude": "claude-opus-5-5",
 }
-DEFAULT_INTELLIGENCE_REASONING_EFFORT: ReasoningEffort = "high"
+DEFAULT_INTELLIGENCE_REASONING_EFFORT: ReasoningEffort = "medium"
 DEFAULT_REVIEW_MODELS: dict[AgentProvider, str] = {
     "copilot": "gpt-6.1-sol",
     "amplifier-agent": "openai/gpt-6.1-sol",

@@ -14,7 +14,7 @@ smart-tool-creator check-spec-adherence --directory ~/src/incident-postmortem
 smart-tool-creator check-spec-adherence \
   --directory ~/src/incident-postmortem \
   --agent-provider amplifier-agent \
-  --model anthropic/claude-opus-5
+  --model anthropic/claude-opus-5-5
 
 # one part of the checklist
 smart-tool-creator check-spec-adherence \
@@ -45,15 +45,15 @@ report.counts, report.deviating, report.findings, report.output_message
 - `--agent-provider`: what the agent runs through, `{{ agent_providers | join: "` or `" }}`. The
   first installed, in that order, when omitted.
 - `--model`: the model the reviewers run on: a Copilot model id for `copilot`,
-  `<provider>/<model>` for `amplifier-agent` (for instance `anthropic/claude-opus-5`), a
+  `<provider>/<model>` for `amplifier-agent` (for instance `anthropic/claude-opus-5-5`), a
   Codex model id for `codex`, a Claude model id for `claude`.
   Defaults to `{{ default_review_models.copilot }}` on `copilot`,
   `{{ default_review_models["amplifier-agent"] }}` on `amplifier-agent`,
   `{{ default_review_models.codex }}` on `codex`, and
   `{{ default_review_models.claude }}` on `claude`.
 - `--reasoning-effort`: how hard the model thinks before it answers, one of `low`, `medium`,
-  `high`, `xhigh`, `max`. Defaults to `{{ default_review_reasoning_effort }}`. Applies to the
-  `copilot`, `codex`, and `claude` agent providers.
+  `high`, `xhigh`, `max`. Defaults to `{{ default_review_reasoning_effort }}`. Applies to
+  every agent provider.
 - `intelligence`, library only: the `Intelligence` implementation the reviewers run through,
   which wins over `agent_provider`; `resolve_intelligence(agent_provider)` when omitted. Tests
   inject a fake.
