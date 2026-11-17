@@ -1,1 +1,2 @@
-# This page builds with the Python standard library.
+markdown-it-py==4.0.0
+PyYAML==6.0.3

@@ -2,10 +2,10 @@ name: Website
 
 on:
   pull_request:
-    paths: ['site/**', 'docs/assets/**', '.github/workflows/website.yml']
+    paths: ['site/**', 'src/smart_tool_creator/SMART_TOOL.md', 'smart-tool.json', '.github/workflows/website.yml']
   push:
     branches: [main]
-    paths: ['site/**', 'docs/assets/**', '.github/workflows/website.yml']
+    paths: ['site/**', 'src/smart_tool_creator/SMART_TOOL.md', 'smart-tool.json', '.github/workflows/website.yml']
   workflow_dispatch:
     inputs:
       publish:
