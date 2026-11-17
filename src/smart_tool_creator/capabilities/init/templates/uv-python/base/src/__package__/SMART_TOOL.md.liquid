@@ -31,7 +31,7 @@ requires:
       instance OPENAI_API_KEY for its default model. Without them, the model-backed
       capabilities cannot run through amplifier-agent.
     optional: true
-    install: https://github.com/microsoft/amplifier-agent/blob/v0.22.0/docs/providers.md
+    install: https://github.com/microsoft/amplifier-agent/blob/v0.30.0/docs/providers.md
 {% endif %}{% if agent_providers contains "codex" %}  - name: codex-sign-in
     purpose: >-
       The Codex CLI signed in with ChatGPT or an API key, for the codex agent provider.
@@ -106,7 +106,7 @@ Every capability is deterministic and needs only `uv`.
 {% endif %}{% if agent_providers contains "amplifier-agent" %}- `amplifier-agent`: [Amplifier Agent](https://github.com/microsoft/amplifier-agent), calling
   the model provider named in the model `<provider>/<model>` with that provider's credentials,
   for instance `OPENAI_API_KEY` for the default `openai/...` models. See its
-  [providers](https://github.com/microsoft/amplifier-agent/blob/v0.22.0/docs/providers.md).
+  [providers](https://github.com/microsoft/amplifier-agent/blob/v0.30.0/docs/providers.md).
 {% endif %}{% if agent_providers contains "codex" %}- `codex`: [OpenAI Codex](https://github.com/openai/codex), with the user's Codex configuration.
   The Codex CLI must be signed in with ChatGPT or an API key, see
   [authentication](https://developers.openai.com/codex/auth).

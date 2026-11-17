@@ -31,7 +31,7 @@ AGENT_PROVIDER_HELP = (
     "amplifier-agent (Amplifier Agent, with the model provider's credentials), codex (OpenAI Codex, with the "
     "Codex sign-in), or claude (Claude Agent SDK). The first installed, in that order, when omitted."
 )
-REASONING_EFFORT_NOTE = "Applies to the copilot, codex, and claude agent providers."
+REASONING_EFFORT_NOTE = "Applies to every agent provider."
 
 
 def _model_help(defaults: dict[AgentProvider, str]) -> str:

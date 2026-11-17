@@ -92,7 +92,7 @@ def submits(arguments: dict[str, Any] | None) -> Script:
 def request(workspace: Path | None = None, **fields: Any) -> AgentRequest:
     return AgentRequest(
         prompt="Do the work.",
-        model="gpt-6-astra",
+        model="gpt-6.1-sol",
         workspace=HostWorkspace(path=workspace) if workspace is not None else None,
         timeout_seconds=60,
         **fields,

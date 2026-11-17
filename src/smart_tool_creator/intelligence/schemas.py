@@ -26,7 +26,7 @@ class AgentRequest(BaseModel):
     output_schema: dict[str, Any] | None = Field(
         default=None, description="JSON schema the structured output must satisfy"
     )
-    reasoning_effort: ReasoningEffort = "low"
+    reasoning_effort: ReasoningEffort = "medium"
     timeout_seconds: int = Field(gt=0)
     resume: str | None = Field(
         default=None,

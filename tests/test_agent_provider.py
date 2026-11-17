@@ -108,9 +108,9 @@ def test_an_injected_intelligence_wins_and_needs_no_agent_provider_installed(mon
         fake,
         DEFAULT_REVIEW_MODELS["amplifier-agent"],
     )
-    assert select_intelligence(fake, None, "anthropic/claude-opus-5", DEFAULT_REVIEW_MODELS) == (
+    assert select_intelligence(fake, None, "anthropic/claude-opus-5-5", DEFAULT_REVIEW_MODELS) == (
         fake,
-        "anthropic/claude-opus-5",
+        "anthropic/claude-opus-5-5",
     )
 
 
@@ -156,12 +156,12 @@ def test_the_cli_passes_the_agent_provider_and_model_through(monkeypatch: pytest
     monkeypatch.setattr("smart_tool_creator.lib.check_spec_adherence", fake)
 
     result = runner.invoke(
-        app, ["check-spec-adherence", "--agent-provider", "amplifier-agent", "--model", "anthropic/claude-opus-5"]
+        app, ["check-spec-adherence", "--agent-provider", "amplifier-agent", "--model", "anthropic/claude-opus-5-5"]
     )
 
     assert result.exit_code == 0
     assert received["agent_provider"] == "amplifier-agent"
-    assert received["model"] == "anthropic/claude-opus-5"
+    assert received["model"] == "anthropic/claude-opus-5-5"
 
 
 @pytest.mark.parametrize("agent_provider", ["amplifier-agent", "claude"])
