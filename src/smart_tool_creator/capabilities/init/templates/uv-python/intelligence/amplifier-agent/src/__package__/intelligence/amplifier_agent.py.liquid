@@ -35,7 +35,7 @@ from {{ package }}.schemas import DEFAULT_INTELLIGENCE_MODELS, {{ error_class }}
 
 READ_ONLY_TOOLS = ["read_file", "glob", "grep", "bash"]
 WRITE_TOOLS = ["write_file", "edit_file"]
-PROVIDERS_DOCUMENTATION = "https://github.com/microsoft/amplifier-agent/blob/v0.30.0/docs/providers.md"
+PROVIDERS_DOCUMENTATION = "https://github.com/microsoft/amplifier-agent/blob/main/docs/providers.md"
 JSON_SCHEMA_DIALECT = "https://json-schema.org/draft/2020-12/schema"
 # Declaring any object leaves the submission to the handler, which judges it with the same validator as the
 # end of the turn, so a call the model can retry fails with the message the resubmit prompt would give.

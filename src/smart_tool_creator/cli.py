@@ -8,6 +8,7 @@ import typer
 
 # Typer 0.27 vendors Click, so a command that overrides Click's own hooks has to speak the vendored types.
 from typer._click import Context, Parameter
+from typer._coercion import bool_flag_type_descriptor
 from typer.core import TyperCommand, TyperOption
 from typer.models import CommandFunctionType
 
@@ -64,6 +65,7 @@ class CapabilityCommand(TyperCommand):
             *super().get_params(ctx),
             TyperOption(
                 param_decls=["-h"],
+                type_descriptor=bool_flag_type_descriptor(),
                 is_flag=True,
                 is_eager=True,
                 expose_value=False,
@@ -72,6 +74,7 @@ class CapabilityCommand(TyperCommand):
             ),
             TyperOption(
                 param_decls=["--help"],
+                type_descriptor=bool_flag_type_descriptor(),
                 is_flag=True,
                 is_eager=True,
                 expose_value=False,
