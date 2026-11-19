@@ -29,7 +29,7 @@ NAME_SEGMENT = "__name__"
 INITIAL_VERSION = "0.1.0"
 PYTHON_VERSION = "3.13"
 
-BASE_DEPENDENCIES = ["pydantic>=2.13,<3.0", "pyyaml>=6.0.3,<7.0.0", "typer>=0.27.2,<0.28.0"]
+BASE_DEPENDENCIES = ["pydantic>=2.13,<3.0", "pyyaml>=6.0.3,<7.0.0", "typer>=0.29.1,<1.0.0"]
 # Every agent provider's SDK is an optional extra of its own; this is what their shared code needs.
 INTELLIGENCE_DEPENDENCIES = ["jsonschema>=4.26.0,<5.0.0"]
 AGENT_PROVIDER_SDKS: dict[AgentProvider, AgentProviderSdk] = {
@@ -44,7 +44,7 @@ AGENT_PROVIDER_SDKS: dict[AgentProvider, AgentProviderSdk] = {
         title="Amplifier Agent",
         link="[Amplifier Agent](https://github.com/microsoft/amplifier-agent)",
         module="amplifier_agent",
-        requirement="amplifier-agent @ git+https://github.com/microsoft/amplifier-agent@v0.30.0#subdirectory=packages/python",
+        requirement="amplifier-agent @ git+https://github.com/microsoft/amplifier-agent#subdirectory=packages/python",
         repository="https://github.com/microsoft/amplifier-agent",
     ),
     "codex": AgentProviderSdk(
@@ -58,7 +58,7 @@ AGENT_PROVIDER_SDKS: dict[AgentProvider, AgentProviderSdk] = {
         title="Claude",
         link="the [Claude Agent SDK](https://github.com/anthropics/claude-agent-sdk-python)",
         module="claude_agent_sdk",
-        requirement="claude-agent-sdk>=0.2.180,<0.3.0",
+        requirement="claude-agent-sdk>=0.2.180,<1.0.0",
         repository="https://github.com/anthropics/claude-agent-sdk-python",
     ),
 }
